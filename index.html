@@ -374,7 +374,7 @@
         <div class="section-label">Nền tảng</div>
         <div class="platform-group" id="platformGroup">
           <div class="platform-btn active" data-val="Facebook">Facebook</div>
-          <div class="platform-btn active" data-val="TikTok">TikTok</div>
+          <div class="platform-btn" data-val="TikTok">TikTok</div>
           <div class="platform-btn" data-val="Instagram">Instagram</div>
         </div>
       </div>
@@ -493,8 +493,10 @@
             <div class="schedule-slot" data-time="12:00" onclick="selectSlot(this)">12:00 TR</div>
             <div class="schedule-slot" data-time="19:00" onclick="selectSlot(this)">7:00 TỐI</div>
             <div class="schedule-slot" data-time="21:00" onclick="selectSlot(this)">9:00 TỐI</div>
-            <div class="schedule-custom">
-              <input type="datetime-local" id="customTime" onchange="selectCustomTime(this)">
+            <div class="schedule-custom" style="position:relative;">
+              <button class="schedule-slot" id="customPickerBtn" onclick="openDatePicker()">📅 Chọn ngày &amp; giờ</button>
+              <input type="datetime-local" id="customTime" onchange="selectCustomTime(this)"
+                style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;overflow:hidden;top:0;left:0;">
             </div>
           </div>
           <div class="schedule-selected" id="scheduleSelected"></div>
@@ -995,11 +997,24 @@ function selectSlot(el){
   document.getElementById('customTime').value = '';
   showScheduledTime(d);
 }
+function openDatePicker(){
+  const input = document.getElementById('customTime');
+  try { input.showPicker(); } catch(e) { input.click(); }
+}
+
 function selectCustomTime(input){
   document.querySelectorAll('.schedule-slot').forEach(s=>s.classList.remove('selected'));
   selectedScheduleTime = input.value ? new Date(input.value) : null;
-  if(selectedScheduleTime) showScheduledTime(selectedScheduleTime);
-  else document.getElementById('scheduleSelected').style.display = 'none';
+  const btn = document.getElementById('customPickerBtn');
+  if(selectedScheduleTime){
+    btn.classList.add('selected');
+    btn.textContent = '📅 ' + selectedScheduleTime.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    showScheduledTime(selectedScheduleTime);
+  } else {
+    btn.classList.remove('selected');
+    btn.textContent = '📅 Chọn ngày & giờ';
+    document.getElementById('scheduleSelected').style.display = 'none';
+  }
 }
 function showScheduledTime(d){
   const el = document.getElementById('scheduleSelected');
