@@ -212,6 +212,113 @@
   ::-webkit-scrollbar{width:3px;}
   ::-webkit-scrollbar-track{background:transparent;}
   ::-webkit-scrollbar-thumb{background:#333;border-radius:2px;}
+
+  /* ── MOBILE NAV (hidden on desktop) ── */
+  .mobile-nav{display:none;}
+
+  /* ════════════════════════════════════
+     RESPONSIVE — MOBILE (max 767px)
+  ════════════════════════════════════ */
+  @media(max-width:767px){
+    /* Body scrollable on mobile */
+    body{height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
+
+    /* Header compact */
+    header{height:50px;padding:0 12px;gap:8px;}
+    .logo{font-size:17px;letter-spacing:2px;}
+    .logo-sub{display:none;}
+    .api-indicator{display:none;}
+    .header-badge{display:none;}
+    .settings-btn{font-size:9px;padding:3px 8px;}
+
+    /* Body stack */
+    .body{flex:1;overflow:hidden;position:relative;}
+
+    /* All panels hidden by default on mobile */
+    .history-panel,
+    .form-sidebar,
+    .viewer { display:none !important; }
+
+    /* Show active panel */
+    .history-panel.mob-active,
+    .form-sidebar.mob-active,
+    .viewer.mob-active { display:flex !important; }
+
+    /* Full-width panels */
+    .history-panel{width:100%;border-right:none;}
+    .form-sidebar{width:100%;border-right:none;overflow-y:auto;}
+    .viewer{width:100%;flex:1;}
+
+    /* Form inner */
+    .form-inner{padding:14px 13px;gap:12px;}
+    .btn-generate{padding:14px;font-size:16px;}
+
+    /* Viewer header wraps */
+    .viewer-header{flex-wrap:wrap;row-gap:8px;min-height:auto;padding:10px 14px;}
+    .viewer-header > div:first-child{width:100%;}
+    .viewer-actions{flex-wrap:wrap;gap:5px;}
+    .btn-act,.btn-regen,.btn-download{padding:7px 10px;font-size:10px;}
+    .btn-post-now{padding:7px 10px;font-size:10px;}
+    .viewer-body{padding:14px 14px 80px;}
+
+    /* Content single column */
+    .content-grid{grid-template-columns:1fr;gap:14px;}
+    .image-panel{max-width:100%;}
+
+    /* Schedule */
+    .schedule-bar{margin-top:12px;}
+    .schedule-custom input{width:100%;}
+
+    /* Welcome */
+    .welcome{padding:30px 20px;}
+
+    /* History */
+    .history-footer{padding:7px 12px;}
+
+    /* Toasts above bottom nav */
+    .toast-container{bottom:68px;right:10px;left:10px;}
+    .toast{max-width:100%;}
+
+    /* Modal full width */
+    .modal{width:calc(100vw - 28px);max-height:82dvh;overflow-y:auto;}
+
+    /* Bottom nav */
+    .mobile-nav{
+      display:flex;
+      border-top:1px solid var(--border);
+      background:var(--dark);
+      flex-shrink:0;
+      height:58px;
+      position:relative;
+      z-index:50;
+    }
+    .mnav-btn{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;background:transparent;border:none;color:var(--muted);
+      cursor:pointer;transition:color .15s;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+    }
+    .mnav-btn.active{color:var(--orange);}
+    .mnav-icon{font-size:19px;line-height:1;}
+    .mnav-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;}
+    .mnav-badge{
+      position:absolute;top:-4px;right:6px;
+      background:var(--orange);color:white;
+      width:16px;height:16px;border-radius:50%;
+      font-size:9px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .mnav-btn-wrap{position:relative;}
+  }
+
+  /* ── TABLET (768–1024px) ── */
+  @media(min-width:768px) and (max-width:1024px){
+    .history-panel{width:180px;}
+    .form-sidebar{width:250px;}
+    .viewer-body{padding:18px 20px;}
+    .content-grid{grid-template-columns:1fr 240px;}
+  }
 </style>
 </head>
 <body>
@@ -447,6 +554,25 @@
     </div>
   </div>
 </div>
+
+<!-- ── MOBILE BOTTOM NAV ── -->
+<nav class="mobile-nav" id="mobileNav">
+  <button class="mnav-btn" onclick="switchMobileTab('history')" id="mnavHistory">
+    <div class="mnav-btn-wrap">
+      <span class="mnav-icon">📋</span>
+      <span class="mnav-badge" id="mnavBadge" style="display:none">0</span>
+    </div>
+    <span class="mnav-label">Lịch sử</span>
+  </button>
+  <button class="mnav-btn active" onclick="switchMobileTab('form')" id="mnavForm">
+    <span class="mnav-icon">✏️</span>
+    <span class="mnav-label">Tạo mới</span>
+  </button>
+  <button class="mnav-btn" onclick="switchMobileTab('viewer')" id="mnavViewer">
+    <span class="mnav-icon">👁</span>
+    <span class="mnav-label">Kết quả</span>
+  </button>
+</nav>
 
 <!-- ── TOAST CONTAINER ── -->
 <div class="toast-container" id="toastContainer"></div>
@@ -707,6 +833,7 @@ function renderHistory(){
   document.getElementById('statPosted').textContent = postedCount;
   document.getElementById('statToday').textContent = todayCount;
   document.getElementById('historyClearBtn').style.display = items.length ? 'inline-block' : 'none';
+  updateMobileBadge();
 }
 
 function filterHistory(val){
@@ -755,6 +882,8 @@ function selectItem(id){
   document.querySelectorAll('.history-item').forEach(el=>el.classList.toggle('active', el.dataset.id==id));
   document.getElementById('welcomeState').style.display = 'none';
   document.getElementById('contentArea').style.display  = 'block';
+  // Auto-switch to viewer tab on mobile
+  if(isMobile()) switchMobileTab('viewer');
 
   const display = document.getElementById('contentDisplay');
   display.textContent = item.editedText || item.text;
@@ -978,6 +1107,15 @@ Khi nội dung có kêu gọi hành động liên quan đến đăng ký khóa h
 
 TUYỆT ĐỐI KHÔNG đề cập giá tiền cụ thể (VD: 2.000.000đ, 500k, $100...). Nếu cần nhắc đến chi phí, chỉ dùng cách nói chung như "học phí ưu đãi", "liên hệ để nhận báo giá", "chi phí hợp lý", "đầu tư xứng đáng cho sự nghiệp".
 
+VIẾT NHƯ NGƯỜI THẬT:
+- Tuyệt đối không dùng gạch ngang (-) để liệt kê, không dùng dấu *, %, #... trong thân bài.
+- Không viết theo dạng bullet point hay danh sách có ký tự đầu dòng.
+- Viết thành đoạn văn tự nhiên, xuống dòng theo nhịp cảm xúc chứ không phải theo cấu trúc mục lục.
+- Câu văn có nhịp điệu, lúc ngắn gọn đanh thép, lúc dài hơn để dẫn dắt — như cách một người thật đang kể chuyện hoặc chia sẻ kinh nghiệm.
+- Emoji được dùng tự nhiên, chọn lọc, không lạm dụng. Không dùng emoji thay cho ký tự liệt kê.
+- Hashtag chỉ xuất hiện ở cuối bài, không chen vào giữa đoạn văn.
+- Riêng kịch bản TikTok: vẫn dùng định dạng [SCENE] nhưng phần lời thoại và mô tả phải viết tự nhiên như người nói chuyện thật.
+
 Chỉ xuất nội dung, không giải thích thêm.`;
 
 async function generate(){
@@ -1105,6 +1243,8 @@ Tạo đầy đủ và tối ưu cho từng nền tảng đã chọn.`;
   renderHistory();
   renderQueue();
   showToast('✓ Đã tạo xong content!', 'success');
+  // Auto-switch to viewer tab on mobile
+  if(isMobile()) switchMobileTab('viewer');
 }
 
 // ════════════════════════════════════════════
@@ -1182,6 +1322,61 @@ Tạo phiên bản mới, khác với bản trước.`;
 function escHtml(str){
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// ════════════════════════════════════════════
+// MOBILE RESPONSIVE
+// ════════════════════════════════════════════
+let currentMobileTab = 'form';
+
+function isMobile(){ return window.innerWidth < 768; }
+
+function switchMobileTab(tab){
+  currentMobileTab = tab;
+  const panels = {
+    history: document.querySelector('.history-panel'),
+    form:    document.querySelector('.form-sidebar'),
+    viewer:  document.querySelector('.viewer')
+  };
+  Object.entries(panels).forEach(([key, el])=>{
+    if(el) el.classList.toggle('mob-active', key===tab);
+  });
+  ['History','Form','Viewer'].forEach(t=>{
+    const btn = document.getElementById('mnav'+t);
+    if(btn) btn.classList.toggle('active', t.toLowerCase()===tab);
+  });
+  // Update badge
+  updateMobileBadge();
+}
+
+function updateMobileBadge(){
+  const badge = document.getElementById('mnavBadge');
+  if(!badge) return;
+  const count = items.length;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+  badge.textContent   = count > 9 ? '9+' : count;
+}
+
+// Init mobile state on load
+if(isMobile()){
+  switchMobileTab('form');
+} else {
+  // Desktop: ensure all panels are visible (remove mob-active if any)
+  ['history-panel','form-sidebar','viewer'].forEach(cls=>{
+    const el = document.querySelector('.'+cls);
+    if(el) el.classList.remove('mob-active');
+  });
+}
+
+window.addEventListener('resize', ()=>{
+  if(!isMobile()){
+    ['history-panel','form-sidebar','viewer'].forEach(cls=>{
+      const el = document.querySelector('.'+cls);
+      if(el) el.classList.remove('mob-active');
+    });
+  } else {
+    switchMobileTab(currentMobileTab);
+  }
+});
 
 // ════════════════════════════════════════════
 // KEYBOARD SHORTCUTS
