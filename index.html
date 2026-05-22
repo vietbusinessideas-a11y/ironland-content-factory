@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iron Land — AI Content Factory</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:#0a0a0a; --dark:#111; --panel:#1a1a1a; --border:#2a2a2a;
+    --iron:#c8c8c8; --orange:#ff5a1f; --orange-dim:rgba(255,90,31,0.12);
+    --text:#e8e8e8; --muted:#555; --green:#22c55e; --blue:#3b82f6;
+    --blue-dim:rgba(59,130,246,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--black);color:var(--text);font-family:'IBM Plex Sans',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+  /* HEADER */
+  header{border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;gap:14px;background:var(--dark);flex-shrink:0;height:56px;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:3px;color:var(--orange);line-height:1;}
+  .logo-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+  .header-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .header-badge{background:var(--orange-dim);border:1px solid rgba(255,90,31,0.3);color:var(--orange);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 8px;border-radius:2px;}
+  .webhook-btn{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 9px;border-radius:2px;border:1px solid var(--border);color:var(--muted);cursor:pointer;background:transparent;transition:all .15s;}
+  .webhook-btn.ok{border-color:rgba(34,197,94,.4);color:var(--green);background:rgba(34,197,94,.06);}
+
+  /* LAYOUT */
+  .body{display:flex;flex:1;overflow:hidden;}
+
+  /* HISTORY */
+  .history-panel{width:210px;background:#0d0d0d;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+  .history-header{padding:13px 13px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .history-list{flex:1;overflow-y:auto;padding:5px 0;}
+  .history-item{padding:9px 13px;cursor:pointer;border-left:2px solid transparent;transition:all .15s;}
+  .history-item:hover{background:rgba(255,255,255,.03);}
+  .history-item.active{background:var(--orange-dim);border-left-color:var(--orange);}
+  .hi-title{font-size:12px;color:var(--iron);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;}
+  .hi-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px;}
+  .hi-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+  .history-empty{padding:22px 13px;font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-align:center;line-height:1.6;}
+
+  /* FORM */
+  .form-sidebar{width:295px;background:var(--dark);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
+  .form-inner{padding:16px 15px;display:flex;flex-direction:column;gap:14px;flex:1;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;}
+  .field-group{display:flex;flex-direction:column;gap:4px;}
+  label{font-size:11px;font-weight:600;color:var(--iron);letter-spacing:.5px;}
+  select,textarea,input[type=text]{background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;padding:7px 9px;border-radius:4px;outline:none;transition:border-color .2s;width:100%;}
+  select:focus,textarea:focus,input:focus{border-color:var(--orange);}
+  select option{background:var(--panel);}
+  textarea{resize:vertical;min-height:70px;line-height:1.5;}
+  .platform-group{display:flex;gap:5px;flex-wrap:wrap;}
+  .platform-btn{cursor:pointer;padding:5px 10px;border:1px solid var(--border);background:var(--panel);color:var(--muted);border-radius:3px;font-size:11px;font-family:'IBM Plex Mono',monospace;transition:all .15s;user-select:none;}
+  .platform-btn.active{border-color:var(--orange);background:var(--orange-dim);color:var(--orange);}
+  .btn-generate{background:var(--orange);color:white;border:none;padding:11px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:3px;cursor:pointer;border-radius:4px;transition:all .2s;width:100%;position:relative;overflow:hidden;}
+  .btn-generate:hover{background:#e04a10;}
+  .btn-generate:disabled{background:#333;color:#555;cursor:not-allowed;}
+  .btn-generate .spinner{display:none;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;position:absolute;right:13px;top:50%;transform:translateY(-50%);}
+  .btn-generate.loading .spinner{display:block;}
+  @keyframes spin{to{transform:translateY(-50%) rotate(360deg);}}
+
+  /* VIEWER */
+  .viewer{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .viewer-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--dark);min-height:52px;}
+  .viewer-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--orange);}
+  .viewer-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;}
+  .viewer-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .btn-act{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 11px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;transition:all .15s;white-space:nowrap;}
+  .btn-act:hover{border-color:var(--orange);color:var(--orange);}
+  .btn-act.copied,.btn-act.ok{border-color:var(--green);color:var(--green);}
+  .btn-act.queued{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+  .btn-post-now{background:var(--blue);color:white;border:1px solid var(--blue);padding:5px 13px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;font-weight:600;white-space:nowrap;transition:all .2s;}
+  .btn-post-now:hover{background:#2563eb;}
+  .btn-post-now:disabled{background:#333;border-color:#444;color:#555;cursor:not-allowed;}
+
+  .viewer-body{flex:1;overflow-y:auto;padding:24px 28px;}
+
+  /* CONTENT + IMAGE AREA */
+  .content-grid{display:grid;grid-template-columns:1fr 280px;gap:20px;max-width:960px;}
+  .content-text{font-size:13px;line-height:1.8;white-space:pre-wrap;color:var(--text);font-family:'IBM Plex Sans',sans-serif;outline:none;border:1px solid transparent;border-radius:5px;padding:10px;transition:border-color .2s,background .2s;min-height:60px;}
+  .content-text[contenteditable="true"]:hover{border-color:var(--border);}
+  .content-text[contenteditable="true"]:focus{border-color:var(--orange);background:rgba(255,90,31,0.03);}
+  .edit-hint{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:1px;transition:opacity .2s;}
+  .edit-hint.active{color:var(--orange);}
+  .char-count{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
+  .edit-toolbar{display:none;gap:6px;margin-bottom:8px;align-items:center;}
+  .edit-toolbar.visible{display:flex;}
+  .btn-undo{background:transparent;border:1px solid var(--border);color:var(--muted);padding:3px 9px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;transition:all .15s;}
+  .btn-undo:hover{border-color:var(--iron);color:var(--iron);}
+  .btn-revert{background:transparent;border:1px solid var(--border);color:var(--muted);padding:3px 9px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;transition:all .15s;}
+  .btn-revert:hover{border-color:#ef4444;color:#f87171;}
+  .edited-badge{background:rgba(255,90,31,0.15);border:1px solid rgba(255,90,31,0.3);color:var(--orange);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;}
+
+  /* IMAGE PANEL */
+  .image-panel{display:flex;flex-direction:column;gap:10px;}
+  .img-panel-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+
+  /* Tabs */
+  .img-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+  .img-tab{flex:1;padding:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;text-align:center;cursor:pointer;background:var(--panel);color:var(--muted);transition:all .15s;border:none;}
+  .img-tab.active{background:var(--orange-dim);color:var(--orange);}
+
+  /* Upload zone */
+  .upload-zone{border:1px dashed var(--border);border-radius:6px;padding:20px 12px;text-align:center;cursor:pointer;transition:all .2s;background:var(--panel);}
+  .upload-zone:hover,.upload-zone.drag-over{border-color:var(--orange);background:var(--orange-dim);}
+  .upload-zone input{display:none;}
+  .upload-icon{font-size:24px;margin-bottom:6px;}
+  .upload-hint{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.5;}
+
+  /* Preview selected image */
+  .img-preview{position:relative;border-radius:6px;overflow:hidden;background:var(--panel);border:1px solid var(--border);}
+  .img-preview img{width:100%;display:block;max-height:200px;object-fit:cover;}
+  .img-preview-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .img-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
+
+  /* Library grid */
+  .library-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:260px;overflow-y:auto;}
+  .lib-item{position:relative;border-radius:4px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .15s;aspect-ratio:4/3;background:var(--panel);}
+  .lib-item:hover{border-color:var(--orange);}
+  .lib-item.selected{border-color:var(--orange);}
+  .lib-item.selected::after{content:'✓';position:absolute;top:4px;right:4px;background:var(--orange);color:white;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+  .lib-item img{width:100%;height:100%;object-fit:cover;}
+  .lib-empty{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-align:center;padding:20px 0;line-height:1.6;grid-column:span 2;}
+  .lib-add-btn{grid-column:span 2;border:1px dashed var(--border);border-radius:4px;padding:8px;text-align:center;cursor:pointer;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--muted);background:transparent;transition:all .15s;}
+  .lib-add-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .lib-add-input{display:none;}
+
+  /* Schedule */
+  .schedule-bar{background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:12px 14px;margin-top:16px;max-width:960px;}
+  .schedule-bar-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:9px;text-transform:uppercase;}
+  .schedule-options{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+  .schedule-slot{cursor:pointer;padding:5px 11px;border:1px solid var(--border);background:var(--dark);color:var(--muted);border-radius:3px;font-size:11px;font-family:'IBM Plex Mono',monospace;transition:all .15s;user-select:none;}
+  .schedule-slot:hover{border-color:var(--blue);color:var(--blue);}
+  .schedule-slot.selected{border-color:var(--blue);background:var(--blue-dim);color:var(--blue);}
+  .schedule-custom input{padding:5px 8px;font-size:11px;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:3px;font-family:'IBM Plex Mono',monospace;outline:none;}
+  .schedule-custom input:focus{border-color:var(--blue);}
+
+  /* Queue */
+  .queue-section{margin-top:16px;max-width:960px;}
+  .queue-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+  .queue-item{display:flex;align-items:center;gap:9px;padding:7px 11px;background:var(--panel);border:1px solid var(--border);border-radius:4px;margin-bottom:5px;font-size:12px;}
+  .queue-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .queue-dot.pending{background:var(--blue);}
+  .queue-dot.posted{background:var(--green);}
+  .queue-dot.failed{background:#ef4444;}
+  .queue-img-thumb{width:28px;height:28px;border-radius:3px;object-fit:cover;flex-shrink:0;}
+  .queue-img-none{width:28px;height:28px;border-radius:3px;background:var(--dark);flex-shrink:0;}
+  .queue-text{flex:1;color:var(--iron);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .queue-time{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
+  .queue-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 6px;border-radius:2px;}
+  .queue-badge.pending{background:var(--blue-dim);color:var(--blue);}
+  .queue-badge.posted{background:rgba(34,197,94,.1);color:var(--green);}
+  .queue-badge.failed{background:rgba(239,68,68,.1);color:#f87171;}
+
+  /* Welcome */
+  .welcome{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:.3;text-align:center;}
+  .welcome h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--iron);}
+  .welcome p{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .cursor{display:inline-block;width:2px;height:13px;background:var(--orange);animation:blink .8s infinite;vertical-align:middle;margin-left:2px;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+  .success-msg{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.3);color:var(--green);padding:10px 14px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:12px;max-width:960px;}
+  .error-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:10px 14px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:22px;width:400px;}
+  .modal h3{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;color:var(--orange);margin-bottom:14px;}
+  .modal-field{margin-bottom:12px;}
+  .modal-field label{display:block;font-size:11px;font-weight:600;color:var(--iron);margin-bottom:4px;}
+  .modal-field input{background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 9px;border-radius:4px;outline:none;width:100%;}
+  .modal-field input:focus{border-color:var(--orange);}
+  .modal-hint{font-size:10px;color:var(--muted);margin-top:3px;font-family:'IBM Plex Mono',monospace;line-height:1.5;}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;}
+  .modal-save{background:var(--orange);color:white;border:none;padding:8px 18px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;border-radius:4px;}
+  .modal-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;border-radius:4px;}
+
+  ::-webkit-scrollbar{width:3px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#333;border-radius:2px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">⛰ IRON LAND</div>
+    <div class="logo-sub">AI Content Factory</div>
+  </div>
+  <div class="header-right">
+    <button class="webhook-btn" id="webhookBtn" onclick="openSettings()">⚙ CÀI ĐẶT WEBHOOK</button>
+    <div class="header-badge">POWERED BY CLAUDE</div>
+  </div>
+</header>
+
+<div class="body">
+
+  <!-- HISTORY -->
+  <div class="history-panel">
+    <div class="history-header">Recents</div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty" id="historyEmpty">Chưa có nội dung.<br>Tạo bài đầu tiên →</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <aside class="form-sidebar">
+    <div class="form-inner">
+      <div>
+        <div class="section-label">Nền tảng</div>
+        <div class="platform-group" id="platformGroup">
+          <div class="platform-btn active" data-val="Facebook">Facebook</div>
+          <div class="platform-btn active" data-val="TikTok">TikTok</div>
+          <div class="platform-btn" data-val="Instagram">Instagram</div>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="section-label">Dạng nội dung</div>
+        <select id="contentType">
+          <option value="knowledge">🎓 Kiến thức kỹ thuật</option>
+          <option value="warning">⚠️ Cảnh báo & Lỗi sai</option>
+          <option value="gear">🔧 Review thiết bị</option>
+          <option value="tips">⚡ Tips nhanh</option>
+          <option value="story">🏆 Tình huống thực chiến</option>
+          <option value="course">📣 Quảng bá khóa học</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Chủ đề / Brief</label>
+        <textarea id="brief" placeholder="VD: Lỗi load carabiner sai hướng...&#10;Review Petzl ID cho người mới&#10;Khai giảng WAH tháng 6, Q7"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Tone giọng</label>
+        <select id="tone">
+          <option value="professional">Chuyên gia — nghiêm túc, thực chiến</option>
+          <option value="casual">Thân thiện — dễ gần, gần gũi</option>
+          <option value="urgent">Khẩn cấp — cảnh báo mạnh</option>
+          <option value="story">Kể chuyện — narrative hút người</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Thông tin thêm (tuỳ chọn)</label>
+        <input type="text" id="extra" placeholder="Học phí, địa chỉ, tên HLV...">
+      </div>
+      <button class="btn-generate" id="btnGenerate" onclick="generate()">
+        <span id="btnText">⚡ TẠO CONTENT</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- VIEWER -->
+  <div class="viewer">
+    <div class="viewer-header">
+      <div>
+        <div class="viewer-title" id="viewerTitle" style="color:var(--muted)">Chọn bài từ danh sách</div>
+        <div class="viewer-meta" id="viewerMeta"></div>
+      </div>
+      <div class="viewer-actions" id="viewerActions" style="display:none">
+        <button class="btn-act" id="btnCopy" onclick="copyActive()">COPY</button>
+        <button class="btn-act" id="btnQueue" onclick="addToQueue()" style="display:none">📅 LÊN LỊCH ĐĂNG</button>
+        <button class="btn-post-now" id="btnPostNow" onclick="postNow()" style="display:none">▶ ĐĂNG NGAY</button>
+      </div>
+    </div>
+
+    <div class="viewer-body" id="viewerBody">
+      <div class="welcome" id="welcomeState">
+        <div style="font-size:40px">🧱</div>
+        <h2>BUILT UNBREAKABLE</h2>
+        <p>Nhập brief → Tạo content → Chọn ảnh → Đăng Facebook</p>
+      </div>
+
+      <div id="contentArea" style="display:none">
+        <div class="content-grid" id="contentGrid">
+          <!-- TEXT -->
+          <div>
+            <div class="edit-toolbar" id="editToolbar">
+              <span class="edited-badge" id="editedBadge" style="display:none">✏ ĐÃ CHỈNH SỬA</span>
+              <button class="btn-undo" onclick="undoEdit()">↩ HOÀN TÁC</button>
+              <button class="btn-revert" onclick="revertToOriginal()">✕ VỀ BẢN GỐC</button>
+              <span class="char-count" id="charCount"></span>
+            </div>
+            <div class="content-text" id="contentDisplay" contenteditable="false" spellcheck="false" oninput="onContentEdit()"></div>
+            <div class="edit-hint" id="editHint" style="display:none">✎ Click vào nội dung để chỉnh sửa trước khi đăng</div>
+          </div>
+
+          <!-- IMAGE PANEL — only shown when FB selected -->
+          <div class="image-panel" id="imagePanel" style="display:none">
+            <div class="img-panel-title">🖼 Hình ảnh đính kèm</div>
+            <div class="img-tabs">
+              <button class="img-tab active" onclick="switchImgTab('upload', this)">Upload</button>
+              <button class="img-tab" onclick="switchImgTab('library', this)">Thư viện</button>
+            </div>
+
+            <!-- UPLOAD TAB -->
+            <div id="tabUpload">
+              <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+                <input type="file" id="fileInput" accept="image/*" onchange="onFileSelect(event)">
+                <div class="upload-icon">📁</div>
+                <div class="upload-hint">Kéo thả hoặc click để chọn ảnh<br>JPG, PNG, WebP — tối đa 4MB</div>
+              </div>
+            </div>
+
+            <!-- LIBRARY TAB -->
+            <div id="tabLibrary" style="display:none">
+              <div class="library-grid" id="libraryGrid">
+                <div class="lib-empty" id="libEmpty">Thư viện trống.<br>Thêm ảnh Iron Land để dùng lại.</div>
+                <button class="lib-add-btn" onclick="document.getElementById('libAddInput').click()">+ Thêm ảnh vào thư viện</button>
+                <input type="file" id="libAddInput" accept="image/*" multiple class="lib-add-input" onchange="addToLibrary(event)">
+              </div>
+            </div>
+
+            <!-- SELECTED PREVIEW -->
+            <div class="img-preview" id="imgPreview" style="display:none">
+              <img id="imgPreviewSrc" src="" alt="">
+              <div class="img-preview-name" id="imgPreviewName"></div>
+              <button class="img-remove" onclick="removeSelectedImage()">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCHEDULE BAR -->
+        <div class="schedule-bar" id="scheduleBar" style="display:none">
+          <div class="schedule-bar-title">📅 Chọn giờ đăng</div>
+          <div class="schedule-options">
+            <div class="schedule-slot" data-time="08:00" onclick="selectSlot(this)">8:00 SA</div>
+            <div class="schedule-slot" data-time="12:00" onclick="selectSlot(this)">12:00 TR</div>
+            <div class="schedule-slot" data-time="19:00" onclick="selectSlot(this)">7:00 TỐI</div>
+            <div class="schedule-slot" data-time="21:00" onclick="selectSlot(this)">9:00 TỐI</div>
+            <div class="schedule-custom">
+              <input type="datetime-local" id="customTime" onchange="selectCustomTime(this)">
+            </div>
+          </div>
+        </div>
+
+        <!-- QUEUE -->
+        <div class="queue-section" id="queueSection" style="display:none">
+          <div class="queue-title">Danh sách đăng</div>
+          <div id="queueList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h3>⚙ Cài Đặt Kết Nối</h3>
+    <div class="modal-field">
+      <label>Make.com Webhook URL</label>
+      <input type="text" id="webhookUrl" placeholder="https://hook.eu1.make.com/xxxxx">
+      <div class="modal-hint">Make.com → Webhooks module → Copy URL</div>
+    </div>
+    <div class="modal-field">
+      <label>Facebook Page ID</label>
+      <input type="text" id="pageId" placeholder="123456789012345">
+      <div class="modal-hint">Trang FB → Giới thiệu → xem Page ID</div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-save" onclick="saveSettings()">LƯU</button>
+      <button class="modal-cancel" onclick="closeSettings()">HỦY</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const typeMap={knowledge:'Kiến thức kỹ thuật',warning:'Cảnh báo & Lỗi sai',gear:'Review thiết bị',tips:'Tips nhanh',story:'Tình huống thực chiến',course:'Quảng bá khóa học'};
+const toneMap={professional:'Chuyên gia',casual:'Thân thiện',urgent:'Khẩn cấp',story:'Kể chuyện'};
+
+let items=[], queue=[], activeId=null, selectedScheduleTime=null;
+let selectedImageData=null; // {base64, name, url}
+let library=[]; // [{base64, name, url, id}]
+
+// Load persisted data
+let settings=JSON.parse(localStorage.getItem('il_settings')||'{}');
+try{ library=JSON.parse(localStorage.getItem('il_library')||'[]'); }catch(e){}
+updateWebhookStatus();
+renderLibrary();
+
+// Platform
+document.querySelectorAll('.platform-btn').forEach(btn=>btn.addEventListener('click',()=>btn.classList.toggle('active')));
+function getSelectedPlatforms(){return[...document.querySelectorAll('.platform-btn.active')].map(b=>b.dataset.val);}
+
+// Settings
+function openSettings(){document.getElementById('settingsModal').classList.add('open');document.getElementById('webhookUrl').value=settings.webhookUrl||'';document.getElementById('pageId').value=settings.pageId||'';}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open');}
+function saveSettings(){settings.webhookUrl=document.getElementById('webhookUrl').value.trim();settings.pageId=document.getElementById('pageId').value.trim();localStorage.setItem('il_settings',JSON.stringify(settings));updateWebhookStatus();closeSettings();}
+function updateWebhookStatus(){const el=document.getElementById('webhookBtn');if(settings.webhookUrl){el.textContent='● WEBHOOK ĐÃ KẾT NỐI';el.classList.add('ok');}else{el.textContent='⚙ CÀI ĐẶT WEBHOOK';el.classList.remove('ok');}}
+
+// Image tab
+function switchImgTab(tab, el){
+  document.querySelectorAll('.img-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tabUpload').style.display=tab==='upload'?'block':'none';
+  document.getElementById('tabLibrary').style.display=tab==='library'?'block':'none';
+}
+
+// Upload
+function onDragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('drag-over');}
+function onDragLeave(e){document.getElementById('uploadZone').classList.remove('drag-over');}
+function onDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))processFile(f);}
+function onFileSelect(e){const f=e.target.files[0];if(f)processFile(f);}
+
+function processFile(file){
+  if(file.size>4*1024*1024){alert('Ảnh quá lớn! Tối đa 4MB.');return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    selectedImageData={base64:ev.target.result,name:file.name,url:ev.target.result};
+    showImagePreview(ev.target.result,file.name);
+    // deselect library
+    document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
+  };
+  reader.readAsDataURL(file);
+}
+
+function showImagePreview(url,name){
+  document.getElementById('imgPreviewSrc').src=url;
+  document.getElementById('imgPreviewName').textContent=name;
+  document.getElementById('imgPreview').style.display='block';
+}
+
+function removeSelectedImage(){
+  selectedImageData=null;
+  document.getElementById('imgPreview').style.display='none';
+  document.getElementById('imgPreviewSrc').src='';
+  document.getElementById('fileInput').value='';
+  document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
+}
+
+// Library
+function addToLibrary(e){
+  const files=[...e.target.files];
+  files.forEach(file=>{
+    if(file.size>4*1024*1024)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      library.push({id:Date.now()+Math.random(),base64:ev.target.result,name:file.name,url:ev.target.result});
+      try{localStorage.setItem('il_library',JSON.stringify(library.slice(-30)));}catch(e){}
+      renderLibrary();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+function renderLibrary(){
+  const grid=document.getElementById('libraryGrid');
+  const empty=document.getElementById('libEmpty');
+  [...grid.querySelectorAll('.lib-item')].forEach(e=>e.remove());
+  empty.style.display=library.length?'none':'block';
+  library.forEach(img=>{
+    const el=document.createElement('div');
+    el.className='lib-item'+(selectedImageData&&selectedImageData.url===img.url?' selected':'');
+    el.dataset.id=img.id;
+    el.innerHTML=`<img src="${img.url}" alt="${img.name}" loading="lazy">`;
+    el.onclick=()=>selectLibraryImage(img,el);
+    grid.insertBefore(el,grid.querySelector('.lib-add-btn'));
+  });
+}
+
+function selectLibraryImage(img,el){
+  document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedImageData={base64:img.base64,name:img.name,url:img.url};
+  showImagePreview(img.url,img.name);
+  // switch to upload tab to show preview
+  document.querySelectorAll('.img-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.img-tab')[0].classList.add('active');
+  document.getElementById('tabUpload').style.display='block';
+  document.getElementById('tabLibrary').style.display='none';
+}
+
+// History
+function renderHistory(){
+  const list=document.getElementById('historyList');
+  document.getElementById('historyEmpty').style.display=items.length?'none':'block';
+  [...list.querySelectorAll('.history-item')].forEach(e=>e.remove());
+  items.forEach(item=>{
+    const q=queue.find(q=>q.contentId===item.id);
+    const dotColor=q?(q.status==='posted'?'#22c55e':q.status==='failed'?'#ef4444':'#3b82f6'):null;
+    const el=document.createElement('div');
+    el.className='history-item'+(item.id===activeId?' active':'');
+    el.dataset.id=item.id;
+    el.innerHTML=`<div class="hi-title">${item.title}</div>
+      <div class="hi-meta">${dotColor?`<span class="hi-dot" style="background:${dotColor}"></span>`:''}${item.platform}·${item.type}</div>`;
+    el.addEventListener('click',()=>selectItem(item.id));
+    list.insertBefore(el,list.firstChild);
+  });
+}
+
+function selectItem(id){
+  activeId=id;
+  const item=items.find(i=>i.id===id);
+  if(!item)return;
+  document.querySelectorAll('.history-item').forEach(el=>el.classList.toggle('active',el.dataset.id==id));
+  document.getElementById('welcomeState').style.display='none';
+  document.getElementById('contentArea').style.display='block';
+
+  // Enable editing
+  const display=document.getElementById('contentDisplay');
+  display.textContent=item.editedText||item.text;
+  display.contentEditable='true';
+  document.getElementById('editHint').style.display='block';
+  document.getElementById('editToolbar').classList.add('visible');
+  updateEditState(item);
+  updateCharCount();
+
+  document.getElementById('viewerTitle').style.color='var(--orange)';
+  document.getElementById('viewerTitle').textContent=item.title;
+  document.getElementById('viewerMeta').textContent=`${item.platform}·${item.type}·${item.tone}`;
+  document.getElementById('viewerActions').style.display='flex';
+  const hasFB=item.platform.includes('Facebook');
+  document.getElementById('btnQueue').style.display=hasFB?'inline-block':'none';
+  document.getElementById('btnPostNow').style.display=hasFB?'inline-block':'none';
+  document.getElementById('scheduleBar').style.display=hasFB?'block':'none';
+  document.getElementById('imagePanel').style.display=hasFB?'flex':'none';
+  selectedScheduleTime=null;
+  document.querySelectorAll('.schedule-slot').forEach(s=>s.classList.remove('selected'));
+  document.getElementById('customTime').value='';
+  removeSelectedImage();
+  renderQueue();
+}
+
+// Schedule
+function selectSlot(el){
+  document.querySelectorAll('.schedule-slot').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  const [h,m]=el.dataset.time.split(':');
+  const d=new Date();d.setHours(parseInt(h),parseInt(m),0,0);
+  if(d<new Date())d.setDate(d.getDate()+1);
+  selectedScheduleTime=d;
+  document.getElementById('customTime').value='';
+}
+function selectCustomTime(input){
+  document.querySelectorAll('.schedule-slot').forEach(s=>s.classList.remove('selected'));
+  selectedScheduleTime=input.value?new Date(input.value):null;
+}
+
+// Queue actions
+function addToQueue(){
+  const item=items.find(i=>i.id===activeId);
+  if(!item)return;
+  if(!settings.webhookUrl){alert('Vui lòng cài đặt Webhook URL trước!');openSettings();return;}
+  if(!selectedScheduleTime){alert('Vui lòng chọn giờ đăng!');return;}
+  const qItem={id:Date.now(),contentId:item.id,text:getActiveText(),title:item.title,imageData:selectedImageData,scheduledAt:selectedScheduleTime,status:'pending'};
+  queue.push(qItem);
+  renderQueue();renderHistory();
+  const btn=document.getElementById('btnQueue');
+  btn.textContent='✓ ĐÃ LÊN LỊCH';btn.classList.add('queued');
+  setTimeout(()=>{btn.textContent='📅 LÊN LỊCH ĐĂNG';btn.classList.remove('queued');},2500);
+  const delay=selectedScheduleTime-new Date();
+  if(delay>0)setTimeout(()=>sendToMake(qItem),delay);
+  else sendToMake(qItem);
+}
+
+function postNow(){
+  const item=items.find(i=>i.id===activeId);
+  if(!item)return;
+  if(!settings.webhookUrl){alert('Vui lòng cài đặt Webhook URL!');openSettings();return;}
+  const qItem={id:Date.now(),contentId:item.id,text:getActiveText(),title:item.title,imageData:selectedImageData,scheduledAt:new Date(),status:'pending'};
+  queue.push(qItem);renderQueue();renderHistory();
+  sendToMake(qItem);
+}
+
+async function sendToMake(qItem){
+  qItem.status='sending';renderQueue();
+  const payload={
+    message:qItem.text,
+    scheduled_at:qItem.scheduledAt.toISOString(),
+    title:qItem.title,
+    page_id:settings.pageId||'',
+    source:'IronLand Content Factory',
+    has_image:!!qItem.imageData,
+    image_base64:qItem.imageData?qItem.imageData.base64:'',
+    image_name:qItem.imageData?qItem.imageData.name:''
+  };
+  try{
+    await fetch(settings.webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},mode:'no-cors',body:JSON.stringify(payload)});
+    qItem.status='posted';
+  }catch(err){qItem.status='failed';}
+  renderQueue();renderHistory();
+  if(qItem.status==='posted'){
+    const msg=document.createElement('div');msg.className='success-msg';
+    msg.textContent=`✅ Đã gửi lên Make.com${qItem.imageData?' (kèm ảnh '+qItem.imageData.name+')':' (không có ảnh)'} — ${new Date().toLocaleTimeString('vi-VN')}`;
+    document.getElementById('queueSection').after(msg);
+    setTimeout(()=>msg.remove(),5000);
+  }
+}
+
+function renderQueue(){
+  const allQ=[...queue].reverse();
+  const section=document.getElementById('queueSection');
+  const list=document.getElementById('queueList');
+  if(!allQ.length){section.style.display='none';return;}
+  section.style.display='block';list.innerHTML='';
+  allQ.forEach(q=>{
+    const statusLabel={pending:'CHỜ ĐĂNG',sending:'ĐANG GỬI...',posted:'ĐÃ ĐĂNG',failed:'LỖI'}[q.status]||q.status;
+    const el=document.createElement('div');el.className='queue-item';
+    const imgHtml=q.imageData?`<img class="queue-img-thumb" src="${q.imageData.url}" alt="">` : `<div class="queue-img-none"></div>`;
+    el.innerHTML=`<div class="queue-dot ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}"></div>
+      ${imgHtml}
+      <div class="queue-text">${q.title}</div>
+      <div class="queue-time">${q.scheduledAt.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="queue-badge ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}">${statusLabel}</div>`;
+    list.appendChild(el);
+  });
+}
+
+// ── EDIT FUNCTIONS ──
+function onContentEdit(){
+  const item=items.find(i=>i.id===activeId);
+  if(!item)return;
+  const currentText=document.getElementById('contentDisplay').innerText;
+  item.editedText=currentText;
+  updateEditState(item);
+  updateCharCount();
+}
+
+function updateEditState(item){
+  const isEdited=item.editedText&&item.editedText!==item.text;
+  document.getElementById('editedBadge').style.display=isEdited?'inline-block':'none';
+}
+
+function updateCharCount(){
+  const text=document.getElementById('contentDisplay').innerText||'';
+  const count=text.length;
+  const el=document.getElementById('charCount');
+  el.textContent=`${count} ký tự`;
+  // FB recommend < 500 chars for best reach
+  el.style.color=count>500?'#f59e0b':count>1000?'#ef4444':'var(--muted)';
+}
+
+function undoEdit(){
+  document.execCommand('undo');
+  const item=items.find(i=>i.id===activeId);
+  if(item){item.editedText=document.getElementById('contentDisplay').innerText;updateEditState(item);}
+  updateCharCount();
+}
+
+function revertToOriginal(){
+  const item=items.find(i=>i.id===activeId);
+  if(!item)return;
+  if(!confirm('Về lại bản gốc do AI tạo? Các chỉnh sửa sẽ bị mất.'))return;
+  item.editedText=null;
+  document.getElementById('contentDisplay').textContent=item.text;
+  updateEditState(item);
+  updateCharCount();
+}
+
+function getActiveText(){
+  // Always use edited version if exists
+  const item=items.find(i=>i.id===activeId);
+  if(!item)return'';
+  return item.editedText||item.text;
+}
+
+
+function copyActive(){
+  const item=items.find(i=>i.id===activeId);
+  if(!item)return;
+  navigator.clipboard.writeText(getActiveText()).then(()=>{
+    const btn=document.getElementById('btnCopy');btn.textContent='COPIED ✓';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='COPY';btn.classList.remove('copied');},2000);
+  });
+}
+
+// GENERATE
+const SYSTEM_PROMPT=`Bạn là chuyên gia content marketing cho Iron Land Rope Access & Rescue Training Center.
+THƯƠNG HIỆU: Iron Land | Slogan: "Built Unbreakable" | Tiêu chuẩn: IRATA, SPRAT, ATLĐ Việt Nam
+Dịch vụ: Đào tạo Rope Access Level 1-3, Rescue, Work at Height, tư vấn/bán thiết bị.
+GIỌNG: Chuyên gia thực chiến, câu ngắn mạnh, cảnh báo thẳng, trao giá trị thật.
+CẤU TRÚC: HOOK → VALUE → CTA
+HASHTAG: #IronLand #BuiltUnbreakable #IronLandTraining + phù hợp chủ đề
+FORMAT TIKTOK: Scene [SCENE 1 – 0:00–0:03], 30-60s
+FORMAT FACEBOOK: Văn xuôi, xuống dòng, emoji chọn lọc
+Nếu cả 2 nền tảng: 2 bài riêng, tiêu đề phân cách. Chỉ xuất nội dung, không giải thích.`;
+
+async function generate(){
+  const platforms=getSelectedPlatforms();
+  const brief=document.getElementById('brief').value.trim();
+  const contentType=document.getElementById('contentType').value;
+  const tone=document.getElementById('tone').value;
+  const extra=document.getElementById('extra').value.trim();
+  if(!brief){alert('Vui lòng nhập chủ đề!');return;}
+  if(!platforms.length){alert('Vui lòng chọn nền tảng!');return;}
+
+  const userPrompt=`Tạo content loại "${typeMap[contentType]}" cho nền tảng: ${platforms.join(' và ')}.
+Tone: ${toneMap[tone]}. Brief: ${brief}${extra?'\nThêm: '+extra:''}
+Tạo đầy đủ cho từng nền tảng.`;
+
+  const id=Date.now();
+  const shortTitle=brief.length>32?brief.slice(0,32)+'…':brief;
+  const newItem={id,title:shortTitle,platform:platforms.join('+'),type:typeMap[contentType],tone:toneMap[tone],text:''};
+  items.unshift(newItem);activeId=id;renderHistory();
+
+  document.getElementById('welcomeState').style.display='none';
+  document.getElementById('contentArea').style.display='block';
+  const display=document.getElementById('contentDisplay');
+  display.textContent='';
+  display.contentEditable='false'; // disabled during streaming
+  document.getElementById('editHint').style.display='none';
+  document.getElementById('editToolbar').classList.remove('visible');
+  document.getElementById('editedBadge').style.display='none';
+  document.getElementById('viewerTitle').style.color='var(--orange)';
+  document.getElementById('viewerTitle').textContent=shortTitle;
+  document.getElementById('viewerMeta').textContent=`${platforms.join('+')}·${typeMap[contentType]}·${toneMap[tone]}`;
+  document.getElementById('viewerActions').style.display='none';
+  const hasFB=platforms.includes('Facebook');
+  document.getElementById('imagePanel').style.display=hasFB?'flex':'none';
+  document.getElementById('scheduleBar').style.display='none';
+  document.getElementById('queueSection').style.display='none';
+  removeSelectedImage();
+
+  const cursor=document.createElement('span');cursor.className='cursor';display.appendChild(cursor);
+  const btn=document.getElementById('btnGenerate');btn.disabled=true;btn.classList.add('loading');
+  document.getElementById('btnText').textContent='ĐANG TẠO...';
+
+  let fullText='';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{
+        'Content-Type':'application/json',
+        'x-api-key':'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',
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,stream:true,system:SYSTEM_PROMPT,messages:[{role:'user',content:userPrompt}]})
+    });
+    const reader=res.body.getReader();const decoder=new TextDecoder();let buffer='';
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');buffer=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data:'))continue;const data=line.slice(5).trim();if(data==='[DONE]')continue;
+        try{const j=JSON.parse(data);if(j.type==='content_block_delta'&&j.delta?.text){fullText+=j.delta.text;display.textContent=fullText;display.appendChild(cursor);}}catch{}
+      }
+    }
+  }catch(err){
+    display.textContent='';
+    const e=document.createElement('div');e.className='error-msg';e.textContent='⚠️ Lỗi API: '+err.message;
+    document.getElementById('contentArea').appendChild(e);
+  }
+
+  cursor.remove();newItem.text=fullText;display.textContent=fullText;
+
+  // Enable editing after generation
+  display.contentEditable='true';
+  document.getElementById('editHint').style.display='block';
+  document.getElementById('editToolbar').classList.add('visible');
+  document.getElementById('editedBadge').style.display='none';
+  updateCharCount();
+
+  document.getElementById('viewerActions').style.display='flex';
+  document.getElementById('btnQueue').style.display=hasFB?'inline-block':'none';
+  document.getElementById('btnPostNow').style.display=hasFB?'inline-block':'none';
+  document.getElementById('scheduleBar').style.display=hasFB?'block':'none';
+  selectedScheduleTime=null;
+  btn.disabled=false;btn.classList.remove('loading');document.getElementById('btnText').textContent='⚡ TẠO CONTENT';
+  renderQueue();
+}
+
+document.getElementById('brief').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey)generate();});
+</script>
+</body>
+</html>
