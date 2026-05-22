@@ -1025,7 +1025,7 @@ Tạo đầy đủ và tối ưu cho từng nền tảng đã chọn.`;
         'anthropic-dangerous-direct-browser-access':'true'
       },
       body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-5',
         max_tokens: 1800,
         stream: true,
         system: SYSTEM_PROMPT,
@@ -1126,7 +1126,7 @@ Tạo phiên bản mới, khác với bản trước.`;
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
         headers:{'Content-Type':'application/json','x-api-key':settings.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,stream:true,system:SYSTEM_PROMPT,messages:[{role:'user',content:userPrompt}]})
+        body: JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1800,stream:true,system:SYSTEM_PROMPT,messages:[{role:'user',content:userPrompt}]})
       });
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const reader=res.body.getReader(); const decoder=new TextDecoder(); let buffer='';
