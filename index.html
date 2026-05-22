@@ -10,43 +10,61 @@
     --black:#0a0a0a; --dark:#111; --panel:#1a1a1a; --border:#2a2a2a;
     --iron:#c8c8c8; --orange:#ff5a1f; --orange-dim:rgba(255,90,31,0.12);
     --text:#e8e8e8; --muted:#555; --green:#22c55e; --blue:#3b82f6;
-    --blue-dim:rgba(59,130,246,0.12);
+    --blue-dim:rgba(59,130,246,0.12); --purple:#a855f7;
+    --purple-dim:rgba(168,85,247,0.12);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--black);color:var(--text);font-family:'IBM Plex Sans',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
 
-  /* HEADER */
-  header{border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;gap:14px;background:var(--dark);flex-shrink:0;height:56px;}
+  /* ── HEADER ── */
+  header{border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:14px;background:var(--dark);flex-shrink:0;height:56px;}
   .logo{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:3px;color:var(--orange);line-height:1;}
   .logo-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
   .header-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
   .header-badge{background:var(--orange-dim);border:1px solid rgba(255,90,31,0.3);color:var(--orange);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 8px;border-radius:2px;}
-  .webhook-btn{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 9px;border-radius:2px;border:1px solid var(--border);color:var(--muted);cursor:pointer;background:transparent;transition:all .15s;}
-  .webhook-btn.ok{border-color:rgba(34,197,94,.4);color:var(--green);background:rgba(34,197,94,.06);}
+  .api-indicator{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 9px;border-radius:2px;border:1px solid var(--border);color:var(--muted);}
+  .api-indicator.ok{border-color:rgba(168,85,247,.4);color:var(--purple);background:var(--purple-dim);}
+  .settings-btn{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 9px;border-radius:2px;border:1px solid var(--border);color:var(--muted);cursor:pointer;background:transparent;transition:all .15s;}
+  .settings-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .settings-btn.webhook-ok{border-color:rgba(34,197,94,.4);color:var(--green);background:rgba(34,197,94,.06);}
 
-  /* LAYOUT */
+  /* ── LAYOUT ── */
   .body{display:flex;flex:1;overflow:hidden;}
 
-  /* HISTORY */
-  .history-panel{width:210px;background:#0d0d0d;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
-  .history-header{padding:13px 13px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);flex-shrink:0;}
+  /* ── HISTORY PANEL ── */
+  .history-panel{width:215px;background:#0d0d0d;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+  .history-header{padding:10px 12px 8px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:5px;}
+  .history-count{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1px 7px;font-size:9px;color:var(--iron);font-family:'IBM Plex Mono',monospace;}
+  .history-clear{margin-left:auto;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:2px;transition:color .15s;flex-shrink:0;line-height:1;}
+  .history-clear:hover{color:#ef4444;}
+  .history-search{padding:6px 8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .history-search input{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:5px 8px;border-radius:3px;outline:none;transition:border-color .2s;}
+  .history-search input::placeholder{color:var(--muted);}
+  .history-search input:focus{border-color:var(--orange);}
   .history-list{flex:1;overflow-y:auto;padding:5px 0;}
-  .history-item{padding:9px 13px;cursor:pointer;border-left:2px solid transparent;transition:all .15s;}
+  .history-item{padding:9px 12px;cursor:pointer;border-left:2px solid transparent;transition:all .15s;position:relative;}
   .history-item:hover{background:rgba(255,255,255,.03);}
   .history-item.active{background:var(--orange-dim);border-left-color:var(--orange);}
-  .hi-title{font-size:12px;color:var(--iron);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;}
+  .hi-title{font-size:12px;color:var(--iron);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:168px;padding-right:20px;}
   .hi-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px;}
   .hi-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-  .history-empty{padding:22px 13px;font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-align:center;line-height:1.6;}
+  .hi-del{display:none;position:absolute;top:50%;right:8px;transform:translateY(-50%);background:rgba(0,0,0,.6);border:none;color:#555;cursor:pointer;width:18px;height:18px;border-radius:3px;font-size:11px;align-items:center;justify-content:center;transition:all .15s;}
+  .history-item:hover .hi-del{display:flex;}
+  .hi-del:hover{color:#ef4444;background:rgba(239,68,68,.2);}
+  .history-empty{padding:22px 12px;font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;text-align:center;line-height:1.7;}
+  .history-footer{padding:7px 12px;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace;flex-shrink:0;display:flex;gap:14px;}
+  .stat-item{display:flex;flex-direction:column;gap:2px;}
+  .stat-val{font-size:13px;color:var(--iron);font-weight:600;}
+  .stat-lbl{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
 
-  /* FORM */
+  /* ── FORM SIDEBAR ── */
   .form-sidebar{width:295px;background:var(--dark);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
   .form-inner{padding:16px 15px;display:flex;flex-direction:column;gap:14px;flex:1;}
   .section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;}
   .field-group{display:flex;flex-direction:column;gap:4px;}
   label{font-size:11px;font-weight:600;color:var(--iron);letter-spacing:.5px;}
   select,textarea,input[type=text]{background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;padding:7px 9px;border-radius:4px;outline:none;transition:border-color .2s;width:100%;}
-  select:focus,textarea:focus,input:focus{border-color:var(--orange);}
+  select:focus,textarea:focus,input[type=text]:focus{border-color:var(--orange);}
   select option{background:var(--panel);}
   textarea{resize:vertical;min-height:70px;line-height:1.5;}
   .platform-group{display:flex;gap:5px;flex-wrap:wrap;}
@@ -58,31 +76,36 @@
   .btn-generate .spinner{display:none;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;position:absolute;right:13px;top:50%;transform:translateY(-50%);}
   .btn-generate.loading .spinner{display:block;}
   @keyframes spin{to{transform:translateY(-50%) rotate(360deg);}}
+  .shortcut-hint{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-align:center;letter-spacing:1px;}
+  .no-api-warning{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:#fbbf24;padding:8px 10px;border-radius:4px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;transition:background .15s;text-align:center;line-height:1.5;}
+  .no-api-warning:hover{background:rgba(245,158,11,.14);}
 
-  /* VIEWER */
+  /* ── VIEWER ── */
   .viewer{flex:1;display:flex;flex-direction:column;overflow:hidden;}
   .viewer-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--dark);min-height:52px;}
-  .viewer-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--orange);}
+  .viewer-title{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--muted);}
   .viewer-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;}
   .viewer-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
   .btn-act{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 11px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;transition:all .15s;white-space:nowrap;}
   .btn-act:hover{border-color:var(--orange);color:var(--orange);}
   .btn-act.copied,.btn-act.ok{border-color:var(--green);color:var(--green);}
   .btn-act.queued{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+  .btn-regen{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 11px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;transition:all .15s;white-space:nowrap;}
+  .btn-regen:hover{border-color:var(--purple);color:var(--purple);}
+  .btn-download{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 11px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;transition:all .15s;white-space:nowrap;}
+  .btn-download:hover{border-color:var(--green);color:var(--green);}
   .btn-post-now{background:var(--blue);color:white;border:1px solid var(--blue);padding:5px 13px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;font-weight:600;white-space:nowrap;transition:all .2s;}
   .btn-post-now:hover{background:#2563eb;}
   .btn-post-now:disabled{background:#333;border-color:#444;color:#555;cursor:not-allowed;}
-
   .viewer-body{flex:1;overflow-y:auto;padding:24px 28px;}
 
-  /* CONTENT + IMAGE AREA */
+  /* ── CONTENT + IMAGE ── */
   .content-grid{display:grid;grid-template-columns:1fr 280px;gap:20px;max-width:960px;}
-  .content-text{font-size:13px;line-height:1.8;white-space:pre-wrap;color:var(--text);font-family:'IBM Plex Sans',sans-serif;outline:none;border:1px solid transparent;border-radius:5px;padding:10px;transition:border-color .2s,background .2s;min-height:60px;}
+  .content-text{font-size:13px;line-height:1.85;white-space:pre-wrap;color:var(--text);font-family:'IBM Plex Sans',sans-serif;outline:none;border:1px solid transparent;border-radius:5px;padding:10px;transition:border-color .2s,background .2s;min-height:60px;}
   .content-text[contenteditable="true"]:hover{border-color:var(--border);}
   .content-text[contenteditable="true"]:focus{border-color:var(--orange);background:rgba(255,90,31,0.03);}
-  .edit-hint{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:1px;transition:opacity .2s;}
-  .edit-hint.active{color:var(--orange);}
-  .char-count{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
+  .edit-hint{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:1px;}
+  .char-count{font-family:'IBM Plex Mono',monospace;font-size:9px;margin-top:3px;transition:color .3s;}
   .edit-toolbar{display:none;gap:6px;margin-bottom:8px;align-items:center;}
   .edit-toolbar.visible{display:flex;}
   .btn-undo{background:transparent;border:1px solid var(--border);color:var(--muted);padding:3px 9px;font-size:10px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border-radius:3px;transition:all .15s;}
@@ -91,29 +114,21 @@
   .btn-revert:hover{border-color:#ef4444;color:#f87171;}
   .edited-badge{background:rgba(255,90,31,0.15);border:1px solid rgba(255,90,31,0.3);color:var(--orange);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;}
 
-  /* IMAGE PANEL */
+  /* ── IMAGE PANEL ── */
   .image-panel{display:flex;flex-direction:column;gap:10px;}
   .img-panel-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-
-  /* Tabs */
   .img-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;}
   .img-tab{flex:1;padding:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;text-align:center;cursor:pointer;background:var(--panel);color:var(--muted);transition:all .15s;border:none;}
   .img-tab.active{background:var(--orange-dim);color:var(--orange);}
-
-  /* Upload zone */
   .upload-zone{border:1px dashed var(--border);border-radius:6px;padding:20px 12px;text-align:center;cursor:pointer;transition:all .2s;background:var(--panel);}
   .upload-zone:hover,.upload-zone.drag-over{border-color:var(--orange);background:var(--orange-dim);}
   .upload-zone input{display:none;}
   .upload-icon{font-size:24px;margin-bottom:6px;}
   .upload-hint{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.5;}
-
-  /* Preview selected image */
   .img-preview{position:relative;border-radius:6px;overflow:hidden;background:var(--panel);border:1px solid var(--border);}
   .img-preview img{width:100%;display:block;max-height:200px;object-fit:cover;}
   .img-preview-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .img-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
-
-  /* Library grid */
   .library-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:260px;overflow-y:auto;}
   .lib-item{position:relative;border-radius:4px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .15s;aspect-ratio:4/3;background:var(--panel);}
   .lib-item:hover{border-color:var(--orange);}
@@ -125,7 +140,7 @@
   .lib-add-btn:hover{border-color:var(--orange);color:var(--orange);}
   .lib-add-input{display:none;}
 
-  /* Schedule */
+  /* ── SCHEDULE BAR ── */
   .schedule-bar{background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:12px 14px;margin-top:16px;max-width:960px;}
   .schedule-bar-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:9px;text-transform:uppercase;}
   .schedule-options{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
@@ -134,8 +149,9 @@
   .schedule-slot.selected{border-color:var(--blue);background:var(--blue-dim);color:var(--blue);}
   .schedule-custom input{padding:5px 8px;font-size:11px;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:3px;font-family:'IBM Plex Mono',monospace;outline:none;}
   .schedule-custom input:focus{border-color:var(--blue);}
+  .schedule-selected{margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--blue);padding:5px 10px;background:var(--blue-dim);border:1px solid rgba(59,130,246,.2);border-radius:3px;display:none;}
 
-  /* Queue */
+  /* ── QUEUE ── */
   .queue-section{margin-top:16px;max-width:960px;}
   .queue-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
   .queue-item{display:flex;align-items:center;gap:9px;padding:7px 11px;background:var(--panel);border:1px solid var(--border);border-radius:4px;margin-bottom:5px;font-size:12px;}
@@ -152,29 +168,46 @@
   .queue-badge.posted{background:rgba(34,197,94,.1);color:var(--green);}
   .queue-badge.failed{background:rgba(239,68,68,.1);color:#f87171;}
 
-  /* Welcome */
-  .welcome{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:.3;text-align:center;}
+  /* ── WELCOME STATE ── */
+  .welcome{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:.3;text-align:center;}
   .welcome h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--iron);}
-  .welcome p{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+  .welcome p{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.7;}
   .cursor{display:inline-block;width:2px;height:13px;background:var(--orange);animation:blink .8s infinite;vertical-align:middle;margin-left:2px;}
   @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 
-  .success-msg{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.3);color:var(--green);padding:10px 14px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:12px;max-width:960px;}
-  .error-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:10px 14px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;}
+  /* ── TOAST ── */
+  .toast-container{position:fixed;bottom:20px;right:20px;z-index:300;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;}
+  .toast{background:var(--dark);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:0;transform:translateY(8px);transition:all .25s;max-width:310px;pointer-events:none;line-height:1.5;}
+  .toast.show{opacity:1;transform:translateY(0);}
+  .toast.success{border-color:rgba(34,197,94,.4);color:var(--green);background:rgba(0,0,0,.9);}
+  .toast.error{border-color:rgba(239,68,68,.4);color:#f87171;background:rgba(0,0,0,.9);}
+  .toast.warning{border-color:rgba(245,158,11,.4);color:#fbbf24;background:rgba(0,0,0,.9);}
+  .toast.info{border-color:rgba(59,130,246,.4);color:var(--blue);background:rgba(0,0,0,.9);}
 
-  /* MODAL */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
+  /* ── MODAL ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:center;justify-content:center;}
   .modal-overlay.open{display:flex;}
-  .modal{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:22px;width:400px;}
-  .modal h3{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;color:var(--orange);margin-bottom:14px;}
+  .modal{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:22px;width:430px;}
+  .modal h3{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;color:var(--orange);margin-bottom:16px;}
+  .modal-section-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;margin-top:4px;}
+  .modal-divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
   .modal-field{margin-bottom:12px;}
   .modal-field label{display:block;font-size:11px;font-weight:600;color:var(--iron);margin-bottom:4px;}
-  .modal-field input{background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 9px;border-radius:4px;outline:none;width:100%;}
+  .modal-field input{background:var(--panel);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 9px;border-radius:4px;outline:none;width:100%;transition:border-color .2s;}
   .modal-field input:focus{border-color:var(--orange);}
-  .modal-hint{font-size:10px;color:var(--muted);margin-top:3px;font-family:'IBM Plex Mono',monospace;line-height:1.5;}
+  .modal-hint{font-size:10px;color:var(--muted);margin-top:4px;font-family:'IBM Plex Mono',monospace;line-height:1.5;}
+  .modal-hint a{color:var(--orange);text-decoration:none;}
+  .modal-hint a:hover{text-decoration:underline;}
   .modal-actions{display:flex;gap:8px;margin-top:16px;}
-  .modal-save{background:var(--orange);color:white;border:none;padding:8px 18px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;border-radius:4px;}
+  .modal-save{background:var(--orange);color:white;border:none;padding:8px 18px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;border-radius:4px;transition:background .15s;}
+  .modal-save:hover{background:#e04a10;}
   .modal-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;border-radius:4px;}
+
+  /* ── CONFIRM MODAL ── */
+  #confirmModal .modal{width:340px;}
+  #confirmModal .modal-msg{font-size:12px;color:var(--iron);margin-bottom:16px;line-height:1.6;}
+  .btn-confirm-ok{background:#ef4444;color:white;border:none;padding:7px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;border-radius:4px;}
+  .btn-confirm-ok:hover{background:#dc2626;}
 
   ::-webkit-scrollbar{width:3px;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -183,28 +216,51 @@
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <header>
   <div>
     <div class="logo">⛰ IRON LAND</div>
-    <div class="logo-sub">AI Content Factory</div>
+    <div class="logo-sub">AI Content Factory v2</div>
   </div>
   <div class="header-right">
-    <button class="webhook-btn" id="webhookBtn" onclick="openSettings()">⚙ CÀI ĐẶT WEBHOOK</button>
+    <div class="api-indicator" id="apiIndicator">✗ CHƯA CÀI API KEY</div>
+    <button class="settings-btn" id="webhookBtn" onclick="openSettings()">⚙ CÀI ĐẶT</button>
     <div class="header-badge">POWERED BY CLAUDE</div>
   </div>
 </header>
 
 <div class="body">
 
-  <!-- HISTORY -->
+  <!-- ── HISTORY PANEL ── -->
   <div class="history-panel">
-    <div class="history-header">Recents</div>
+    <div class="history-header">
+      <span>Recents</span>
+      <span class="history-count" id="historyCount">0</span>
+      <button class="history-clear" id="historyClearBtn" onclick="clearAllHistory()" title="Xóa toàn bộ" style="display:none">✕ Xóa</button>
+    </div>
+    <div class="history-search">
+      <input type="text" id="historySearch" placeholder="🔍 tìm kiếm..." oninput="filterHistory(this.value)">
+    </div>
     <div class="history-list" id="historyList">
       <div class="history-empty" id="historyEmpty">Chưa có nội dung.<br>Tạo bài đầu tiên →</div>
     </div>
+    <div class="history-footer">
+      <div class="stat-item">
+        <div class="stat-val" id="statTotal">0</div>
+        <div class="stat-lbl">Tổng bài</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="statPosted">0</div>
+        <div class="stat-lbl">Đã đăng</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="statToday">0</div>
+        <div class="stat-lbl">Hôm nay</div>
+      </div>
+    </div>
   </div>
 
-  <!-- FORM -->
+  <!-- ── FORM SIDEBAR ── -->
   <aside class="form-sidebar">
     <div class="form-inner">
       <div>
@@ -219,7 +275,7 @@
         <div class="section-label">Dạng nội dung</div>
         <select id="contentType">
           <option value="knowledge">🎓 Kiến thức kỹ thuật</option>
-          <option value="warning">⚠️ Cảnh báo & Lỗi sai</option>
+          <option value="warning">⚠️ Cảnh báo &amp; Lỗi sai</option>
           <option value="gear">🔧 Review thiết bị</option>
           <option value="tips">⚡ Tips nhanh</option>
           <option value="story">🏆 Tình huống thực chiến</option>
@@ -243,32 +299,38 @@
         <label>Thông tin thêm (tuỳ chọn)</label>
         <input type="text" id="extra" placeholder="Học phí, địa chỉ, tên HLV...">
       </div>
+      <div id="noApiWarning" class="no-api-warning" onclick="openSettings()" style="display:none">
+        ⚠ Chưa có API Key.<br>Click để cài đặt trước khi tạo content.
+      </div>
       <button class="btn-generate" id="btnGenerate" onclick="generate()">
         <span id="btnText">⚡ TẠO CONTENT</span>
         <div class="spinner"></div>
       </button>
+      <div class="shortcut-hint">Ctrl + Enter để tạo nhanh</div>
     </div>
   </aside>
 
-  <!-- VIEWER -->
+  <!-- ── VIEWER ── -->
   <div class="viewer">
     <div class="viewer-header">
       <div>
-        <div class="viewer-title" id="viewerTitle" style="color:var(--muted)">Chọn bài từ danh sách</div>
+        <div class="viewer-title" id="viewerTitle">Chọn bài từ danh sách</div>
         <div class="viewer-meta" id="viewerMeta"></div>
       </div>
       <div class="viewer-actions" id="viewerActions" style="display:none">
         <button class="btn-act" id="btnCopy" onclick="copyActive()">COPY</button>
-        <button class="btn-act" id="btnQueue" onclick="addToQueue()" style="display:none">📅 LÊN LỊCH ĐĂNG</button>
+        <button class="btn-download" id="btnDownload" onclick="downloadContent()">↓ TẢI .TXT</button>
+        <button class="btn-regen" id="btnRegen" onclick="regenerate()">↺ TẠO LẠI</button>
+        <button class="btn-act" id="btnQueue" onclick="addToQueue()" style="display:none">📅 LÊN LỊCH</button>
         <button class="btn-post-now" id="btnPostNow" onclick="postNow()" style="display:none">▶ ĐĂNG NGAY</button>
       </div>
     </div>
 
     <div class="viewer-body" id="viewerBody">
       <div class="welcome" id="welcomeState">
-        <div style="font-size:40px">🧱</div>
+        <div style="font-size:42px">🧱</div>
         <h2>BUILT UNBREAKABLE</h2>
-        <p>Nhập brief → Tạo content → Chọn ảnh → Đăng Facebook</p>
+        <p>Nhập brief → Chọn nền tảng → Tạo content<br>Chỉnh sửa → Đăng Facebook / TikTok / Instagram</p>
       </div>
 
       <div id="contentArea" style="display:none">
@@ -285,33 +347,29 @@
             <div class="edit-hint" id="editHint" style="display:none">✎ Click vào nội dung để chỉnh sửa trước khi đăng</div>
           </div>
 
-          <!-- IMAGE PANEL — only shown when FB selected -->
+          <!-- IMAGE PANEL (FB + Instagram) -->
           <div class="image-panel" id="imagePanel" style="display:none">
             <div class="img-panel-title">🖼 Hình ảnh đính kèm</div>
             <div class="img-tabs">
-              <button class="img-tab active" onclick="switchImgTab('upload', this)">Upload</button>
-              <button class="img-tab" onclick="switchImgTab('library', this)">Thư viện</button>
+              <button class="img-tab active" onclick="switchImgTab('upload',this)">Upload</button>
+              <button class="img-tab" onclick="switchImgTab('library',this)">Thư viện</button>
             </div>
-
-            <!-- UPLOAD TAB -->
             <div id="tabUpload">
-              <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+              <div class="upload-zone" id="uploadZone"
+                onclick="document.getElementById('fileInput').click()"
+                ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
                 <input type="file" id="fileInput" accept="image/*" onchange="onFileSelect(event)">
                 <div class="upload-icon">📁</div>
                 <div class="upload-hint">Kéo thả hoặc click để chọn ảnh<br>JPG, PNG, WebP — tối đa 4MB</div>
               </div>
             </div>
-
-            <!-- LIBRARY TAB -->
             <div id="tabLibrary" style="display:none">
               <div class="library-grid" id="libraryGrid">
-                <div class="lib-empty" id="libEmpty">Thư viện trống.<br>Thêm ảnh Iron Land để dùng lại.</div>
+                <div class="lib-empty" id="libEmpty">Thư viện trống.<br>Thêm ảnh Iron Land để tái sử dụng.</div>
                 <button class="lib-add-btn" onclick="document.getElementById('libAddInput').click()">+ Thêm ảnh vào thư viện</button>
                 <input type="file" id="libAddInput" accept="image/*" multiple class="lib-add-input" onchange="addToLibrary(event)">
               </div>
             </div>
-
-            <!-- SELECTED PREVIEW -->
             <div class="img-preview" id="imgPreview" style="display:none">
               <img id="imgPreviewSrc" src="" alt="">
               <div class="img-preview-name" id="imgPreviewName"></div>
@@ -332,6 +390,7 @@
               <input type="datetime-local" id="customTime" onchange="selectCustomTime(this)">
             </div>
           </div>
+          <div class="schedule-selected" id="scheduleSelected"></div>
         </div>
 
         <!-- QUEUE -->
@@ -344,425 +403,787 @@
   </div>
 </div>
 
-<!-- SETTINGS MODAL -->
+<!-- ── SETTINGS MODAL ── -->
 <div class="modal-overlay" id="settingsModal">
   <div class="modal">
-    <h3>⚙ Cài Đặt Kết Nối</h3>
+    <h3>⚙ Cài Đặt</h3>
+
+    <div class="modal-section-title">🤖 Claude API</div>
     <div class="modal-field">
-      <label>Make.com Webhook URL</label>
+      <label>API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+      <div class="modal-hint">Lấy tại <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a> → API Keys</div>
+    </div>
+
+    <hr class="modal-divider">
+    <div class="modal-section-title">📡 Make.com Webhook (đăng tự động)</div>
+
+    <div class="modal-field">
+      <label>Webhook URL</label>
       <input type="text" id="webhookUrl" placeholder="https://hook.eu1.make.com/xxxxx">
-      <div class="modal-hint">Make.com → Webhooks module → Copy URL</div>
+      <div class="modal-hint">Make.com → New scenario → Webhooks module → Copy URL</div>
     </div>
     <div class="modal-field">
       <label>Facebook Page ID</label>
       <input type="text" id="pageId" placeholder="123456789012345">
-      <div class="modal-hint">Trang FB → Giới thiệu → xem Page ID</div>
+      <div class="modal-hint">Trang FB → Giới thiệu → cuộn xuống xem Page ID</div>
     </div>
+
     <div class="modal-actions">
-      <button class="modal-save" onclick="saveSettings()">LƯU</button>
+      <button class="modal-save" onclick="saveSettings()">LƯU CÀI ĐẶT</button>
       <button class="modal-cancel" onclick="closeSettings()">HỦY</button>
     </div>
   </div>
 </div>
 
+<!-- ── CONFIRM MODAL ── -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">Xác nhận</h3>
+    <div class="modal-msg" id="confirmMsg"></div>
+    <div class="modal-actions">
+      <button class="btn-confirm-ok" id="confirmOkBtn">XÁC NHẬN</button>
+      <button class="modal-cancel" onclick="closeConfirm()">HỦY</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ── -->
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
-const typeMap={knowledge:'Kiến thức kỹ thuật',warning:'Cảnh báo & Lỗi sai',gear:'Review thiết bị',tips:'Tips nhanh',story:'Tình huống thực chiến',course:'Quảng bá khóa học'};
-const toneMap={professional:'Chuyên gia',casual:'Thân thiện',urgent:'Khẩn cấp',story:'Kể chuyện'};
+// ════════════════════════════════════════════
+// MAPS & CONSTANTS
+// ════════════════════════════════════════════
+const typeMap = {
+  knowledge:'Kiến thức kỹ thuật', warning:'Cảnh báo & Lỗi sai',
+  gear:'Review thiết bị', tips:'Tips nhanh',
+  story:'Tình huống thực chiến', course:'Quảng bá khóa học'
+};
+const toneMap = {professional:'Chuyên gia',casual:'Thân thiện',urgent:'Khẩn cấp',story:'Kể chuyện'};
+const HISTORY_KEY = 'il_history_v2';
+const QUEUE_KEY   = 'il_queue_v2';
+const LIB_KEY     = 'il_library';
+const SETTINGS_KEY= 'il_settings';
 
-let items=[], queue=[], activeId=null, selectedScheduleTime=null;
-let selectedImageData=null; // {base64, name, url}
-let library=[]; // [{base64, name, url, id}]
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let items = [], queue = [], library = [];
+let activeId = null, selectedScheduleTime = null, selectedImageData = null;
+let settings = {};
+let historyFilter = '';
+let confirmCallback = null;
 
-// Load persisted data
-let settings=JSON.parse(localStorage.getItem('il_settings')||'{}');
-try{ library=JSON.parse(localStorage.getItem('il_library')||'[]'); }catch(e){}
-updateWebhookStatus();
-renderLibrary();
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+(function init(){
+  try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}'); } catch(e){}
+  try { items    = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); } catch(e){}
+  try { queue    = JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]');
+        // Restore Date objects
+        queue.forEach(q => { if(q.scheduledAt) q.scheduledAt = new Date(q.scheduledAt); });
+  } catch(e){}
+  try { library  = JSON.parse(localStorage.getItem(LIB_KEY)||'[]'); } catch(e){}
+  updateApiStatus();
+  updateWebhookStatus();
+  renderHistory();
+  renderLibrary();
+})();
 
-// Platform
-document.querySelectorAll('.platform-btn').forEach(btn=>btn.addEventListener('click',()=>btn.classList.toggle('active')));
-function getSelectedPlatforms(){return[...document.querySelectorAll('.platform-btn.active')].map(b=>b.dataset.val);}
+// ════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════
+function showToast(msg, type='info', duration=3000){
+  const ct = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  ct.appendChild(t);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ t.classList.add('show'); }); });
+  setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=>t.remove(), 300);
+  }, duration);
+}
 
-// Settings
-function openSettings(){document.getElementById('settingsModal').classList.add('open');document.getElementById('webhookUrl').value=settings.webhookUrl||'';document.getElementById('pageId').value=settings.pageId||'';}
-function closeSettings(){document.getElementById('settingsModal').classList.remove('open');}
-function saveSettings(){settings.webhookUrl=document.getElementById('webhookUrl').value.trim();settings.pageId=document.getElementById('pageId').value.trim();localStorage.setItem('il_settings',JSON.stringify(settings));updateWebhookStatus();closeSettings();}
-function updateWebhookStatus(){const el=document.getElementById('webhookBtn');if(settings.webhookUrl){el.textContent='● WEBHOOK ĐÃ KẾT NỐI';el.classList.add('ok');}else{el.textContent='⚙ CÀI ĐẶT WEBHOOK';el.classList.remove('ok');}}
+// ════════════════════════════════════════════
+// CONFIRM DIALOG
+// ════════════════════════════════════════════
+function showConfirm(title, msg, cb){
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  confirmCallback = cb;
+  document.getElementById('confirmModal').classList.add('open');
+  document.getElementById('confirmOkBtn').onclick = ()=>{ closeConfirm(); if(cb) cb(); };
+}
+function closeConfirm(){ document.getElementById('confirmModal').classList.remove('open'); }
 
-// Image tab
+// ════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════
+function openSettings(){
+  document.getElementById('settingsModal').classList.add('open');
+  document.getElementById('apiKeyInput').value  = settings.apiKey  || '';
+  document.getElementById('webhookUrl').value   = settings.webhookUrl || '';
+  document.getElementById('pageId').value       = settings.pageId  || '';
+}
+function closeSettings(){ document.getElementById('settingsModal').classList.remove('open'); }
+function saveSettings(){
+  settings.apiKey     = document.getElementById('apiKeyInput').value.trim();
+  settings.webhookUrl = document.getElementById('webhookUrl').value.trim();
+  settings.pageId     = document.getElementById('pageId').value.trim();
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  updateApiStatus();
+  updateWebhookStatus();
+  closeSettings();
+  showToast('✓ Đã lưu cài đặt', 'success');
+}
+function updateApiStatus(){
+  const el = document.getElementById('apiIndicator');
+  const warn = document.getElementById('noApiWarning');
+  if(settings.apiKey){
+    el.textContent = '● API ĐÃ KẾT NỐI';
+    el.classList.add('ok');
+    if(warn) warn.style.display = 'none';
+  } else {
+    el.textContent = '✗ CHƯA CÀI API KEY';
+    el.classList.remove('ok');
+    if(warn) warn.style.display = 'block';
+  }
+}
+function updateWebhookStatus(){
+  const el = document.getElementById('webhookBtn');
+  if(settings.webhookUrl){
+    el.textContent = '● WEBHOOK OK';
+    el.classList.add('webhook-ok');
+  } else {
+    el.textContent = '⚙ CÀI ĐẶT';
+    el.classList.remove('webhook-ok');
+  }
+}
+
+// ════════════════════════════════════════════
+// PLATFORM
+// ════════════════════════════════════════════
+document.querySelectorAll('.platform-btn').forEach(btn =>
+  btn.addEventListener('click', ()=> btn.classList.toggle('active'))
+);
+function getSelectedPlatforms(){
+  return [...document.querySelectorAll('.platform-btn.active')].map(b=>b.dataset.val);
+}
+
+// ════════════════════════════════════════════
+// IMAGE HANDLING
+// ════════════════════════════════════════════
 function switchImgTab(tab, el){
   document.querySelectorAll('.img-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('tabUpload').style.display=tab==='upload'?'block':'none';
-  document.getElementById('tabLibrary').style.display=tab==='library'?'block':'none';
+  document.getElementById('tabUpload').style.display  = tab==='upload'  ? 'block' : 'none';
+  document.getElementById('tabLibrary').style.display = tab==='library' ? 'block' : 'none';
 }
-
-// Upload
-function onDragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('drag-over');}
-function onDragLeave(e){document.getElementById('uploadZone').classList.remove('drag-over');}
-function onDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))processFile(f);}
-function onFileSelect(e){const f=e.target.files[0];if(f)processFile(f);}
-
+function onDragOver(e){ e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
+function onDragLeave(){ document.getElementById('uploadZone').classList.remove('drag-over'); }
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith('image/')) processFile(f);
+}
+function onFileSelect(e){ const f=e.target.files[0]; if(f) processFile(f); }
 function processFile(file){
-  if(file.size>4*1024*1024){alert('Ảnh quá lớn! Tối đa 4MB.');return;}
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    selectedImageData={base64:ev.target.result,name:file.name,url:ev.target.result};
-    showImagePreview(ev.target.result,file.name);
-    // deselect library
+  if(file.size > 4*1024*1024){ showToast('⚠ Ảnh quá lớn! Tối đa 4MB.', 'warning'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    selectedImageData = {base64:ev.target.result, name:file.name, url:ev.target.result};
+    showImagePreview(ev.target.result, file.name);
     document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
   };
   reader.readAsDataURL(file);
 }
-
-function showImagePreview(url,name){
-  document.getElementById('imgPreviewSrc').src=url;
-  document.getElementById('imgPreviewName').textContent=name;
-  document.getElementById('imgPreview').style.display='block';
+function showImagePreview(url, name){
+  document.getElementById('imgPreviewSrc').src = url;
+  document.getElementById('imgPreviewName').textContent = name;
+  document.getElementById('imgPreview').style.display = 'block';
 }
-
 function removeSelectedImage(){
-  selectedImageData=null;
-  document.getElementById('imgPreview').style.display='none';
-  document.getElementById('imgPreviewSrc').src='';
-  document.getElementById('fileInput').value='';
+  selectedImageData = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgPreviewSrc').src = '';
+  document.getElementById('fileInput').value = '';
   document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
 }
 
-// Library
+// ════════════════════════════════════════════
+// LIBRARY
+// ════════════════════════════════════════════
 function addToLibrary(e){
-  const files=[...e.target.files];
+  const files = [...e.target.files];
   files.forEach(file=>{
-    if(file.size>4*1024*1024)return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      library.push({id:Date.now()+Math.random(),base64:ev.target.result,name:file.name,url:ev.target.result});
-      try{localStorage.setItem('il_library',JSON.stringify(library.slice(-30)));}catch(e){}
+    if(file.size > 4*1024*1024) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      library.push({id:Date.now()+Math.random(), base64:ev.target.result, name:file.name, url:ev.target.result});
+      try { localStorage.setItem(LIB_KEY, JSON.stringify(library.slice(-30))); } catch(e){}
       renderLibrary();
+      showToast(`✓ Đã thêm "${file.name}" vào thư viện`, 'success');
     };
     reader.readAsDataURL(file);
   });
-  e.target.value='';
+  e.target.value = '';
 }
-
 function renderLibrary(){
-  const grid=document.getElementById('libraryGrid');
-  const empty=document.getElementById('libEmpty');
+  const grid = document.getElementById('libraryGrid');
+  const empty = document.getElementById('libEmpty');
   [...grid.querySelectorAll('.lib-item')].forEach(e=>e.remove());
-  empty.style.display=library.length?'none':'block';
+  empty.style.display = library.length ? 'none' : 'block';
   library.forEach(img=>{
-    const el=document.createElement('div');
-    el.className='lib-item'+(selectedImageData&&selectedImageData.url===img.url?' selected':'');
-    el.dataset.id=img.id;
-    el.innerHTML=`<img src="${img.url}" alt="${img.name}" loading="lazy">`;
-    el.onclick=()=>selectLibraryImage(img,el);
-    grid.insertBefore(el,grid.querySelector('.lib-add-btn'));
+    const el = document.createElement('div');
+    el.className = 'lib-item' + (selectedImageData && selectedImageData.url===img.url ? ' selected' : '');
+    el.dataset.id = img.id;
+    el.innerHTML = `<img src="${img.url}" alt="${img.name}" loading="lazy">`;
+    el.onclick = ()=> selectLibraryImage(img, el);
+    grid.insertBefore(el, grid.querySelector('.lib-add-btn'));
   });
 }
-
-function selectLibraryImage(img,el){
+function selectLibraryImage(img, el){
   document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
   el.classList.add('selected');
-  selectedImageData={base64:img.base64,name:img.name,url:img.url};
-  showImagePreview(img.url,img.name);
-  // switch to upload tab to show preview
+  selectedImageData = {base64:img.base64, name:img.name, url:img.url};
+  showImagePreview(img.url, img.name);
+  // switch tab to upload to show preview
   document.querySelectorAll('.img-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.img-tab')[0].classList.add('active');
-  document.getElementById('tabUpload').style.display='block';
-  document.getElementById('tabLibrary').style.display='none';
+  document.getElementById('tabUpload').style.display  = 'block';
+  document.getElementById('tabLibrary').style.display = 'none';
 }
 
-// History
+// ════════════════════════════════════════════
+// HISTORY
+// ════════════════════════════════════════════
+function saveHistory(){ try { localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0,60))); } catch(e){} }
+
 function renderHistory(){
-  const list=document.getElementById('historyList');
-  document.getElementById('historyEmpty').style.display=items.length?'none':'block';
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('historyEmpty');
+  const filtered = historyFilter
+    ? items.filter(i => i.title.toLowerCase().includes(historyFilter.toLowerCase()) || i.type.toLowerCase().includes(historyFilter.toLowerCase()))
+    : items;
+
+  // Clear old items
   [...list.querySelectorAll('.history-item')].forEach(e=>e.remove());
-  items.forEach(item=>{
-    const q=queue.find(q=>q.contentId===item.id);
-    const dotColor=q?(q.status==='posted'?'#22c55e':q.status==='failed'?'#ef4444':'#3b82f6'):null;
-    const el=document.createElement('div');
-    el.className='history-item'+(item.id===activeId?' active':'');
-    el.dataset.id=item.id;
-    el.innerHTML=`<div class="hi-title">${item.title}</div>
-      <div class="hi-meta">${dotColor?`<span class="hi-dot" style="background:${dotColor}"></span>`:''}${item.platform}·${item.type}</div>`;
-    el.addEventListener('click',()=>selectItem(item.id));
-    list.insertBefore(el,list.firstChild);
+  empty.style.display = filtered.length ? 'none' : 'block';
+
+  if(!filtered.length && historyFilter){
+    empty.textContent = `Không tìm thấy "${historyFilter}"`;
+  } else if(!filtered.length){
+    empty.innerHTML = 'Chưa có nội dung.<br>Tạo bài đầu tiên →';
+  }
+
+  filtered.forEach(item=>{
+    const q = queue.find(q=>q.contentId===item.id);
+    const dotColor = q ? (q.status==='posted'?'#22c55e':q.status==='failed'?'#ef4444':'#3b82f6') : null;
+    const el = document.createElement('div');
+    el.className = 'history-item' + (item.id===activeId?' active':'');
+    el.dataset.id = item.id;
+    el.innerHTML = `
+      <div class="hi-title">${escHtml(item.title)}</div>
+      <div class="hi-meta">
+        ${dotColor?`<span class="hi-dot" style="background:${dotColor}"></span>`:''}
+        ${escHtml(item.platform)}·${escHtml(item.type)}
+      </div>
+      <button class="hi-del" onclick="deleteItem(event,'${item.id}')" title="Xóa">✕</button>`;
+    el.addEventListener('click', ()=>selectItem(item.id));
+    list.insertBefore(el, list.firstChild);
+  });
+
+  // Stats
+  const today = new Date().toDateString();
+  const todayCount = items.filter(i=>new Date(i.createdAt).toDateString()===today).length;
+  const postedCount = queue.filter(q=>q.status==='posted').length;
+  document.getElementById('historyCount').textContent = items.length;
+  document.getElementById('statTotal').textContent = items.length;
+  document.getElementById('statPosted').textContent = postedCount;
+  document.getElementById('statToday').textContent = todayCount;
+  document.getElementById('historyClearBtn').style.display = items.length ? 'inline-block' : 'none';
+}
+
+function filterHistory(val){
+  historyFilter = val;
+  renderHistory();
+}
+
+function deleteItem(e, id){
+  e.stopPropagation();
+  items = items.filter(i=>i.id!=id);
+  if(activeId==id){
+    activeId = null;
+    document.getElementById('welcomeState').style.display = '';
+    document.getElementById('contentArea').style.display  = 'none';
+    document.getElementById('viewerActions').style.display = 'none';
+    document.getElementById('viewerTitle').textContent = 'Chọn bài từ danh sách';
+    document.getElementById('viewerTitle').style.color = '';
+    document.getElementById('viewerMeta').textContent = '';
+  }
+  saveHistory();
+  renderHistory();
+  showToast('Đã xóa bài', 'info');
+}
+
+function clearAllHistory(){
+  showConfirm('Xóa toàn bộ lịch sử?', 'Tất cả bài đã tạo sẽ bị xóa vĩnh viễn. Bạn có chắc không?', ()=>{
+    items = [];
+    activeId = null;
+    document.getElementById('welcomeState').style.display = '';
+    document.getElementById('contentArea').style.display  = 'none';
+    document.getElementById('viewerActions').style.display = 'none';
+    document.getElementById('viewerTitle').textContent = 'Chọn bài từ danh sách';
+    document.getElementById('viewerTitle').style.color = '';
+    document.getElementById('viewerMeta').textContent = '';
+    saveHistory();
+    renderHistory();
+    showToast('Đã xóa toàn bộ lịch sử', 'warning');
   });
 }
 
 function selectItem(id){
-  activeId=id;
-  const item=items.find(i=>i.id===id);
-  if(!item)return;
-  document.querySelectorAll('.history-item').forEach(el=>el.classList.toggle('active',el.dataset.id==id));
-  document.getElementById('welcomeState').style.display='none';
-  document.getElementById('contentArea').style.display='block';
+  activeId = id;
+  const item = items.find(i=>i.id===id);
+  if(!item) return;
 
-  // Enable editing
-  const display=document.getElementById('contentDisplay');
-  display.textContent=item.editedText||item.text;
-  display.contentEditable='true';
-  document.getElementById('editHint').style.display='block';
+  document.querySelectorAll('.history-item').forEach(el=>el.classList.toggle('active', el.dataset.id==id));
+  document.getElementById('welcomeState').style.display = 'none';
+  document.getElementById('contentArea').style.display  = 'block';
+
+  const display = document.getElementById('contentDisplay');
+  display.textContent = item.editedText || item.text;
+  display.contentEditable = 'true';
+  document.getElementById('editHint').style.display  = 'block';
   document.getElementById('editToolbar').classList.add('visible');
   updateEditState(item);
   updateCharCount();
 
-  document.getElementById('viewerTitle').style.color='var(--orange)';
-  document.getElementById('viewerTitle').textContent=item.title;
-  document.getElementById('viewerMeta').textContent=`${item.platform}·${item.type}·${item.tone}`;
-  document.getElementById('viewerActions').style.display='flex';
-  const hasFB=item.platform.includes('Facebook');
-  document.getElementById('btnQueue').style.display=hasFB?'inline-block':'none';
-  document.getElementById('btnPostNow').style.display=hasFB?'inline-block':'none';
-  document.getElementById('scheduleBar').style.display=hasFB?'block':'none';
-  document.getElementById('imagePanel').style.display=hasFB?'flex':'none';
-  selectedScheduleTime=null;
+  document.getElementById('viewerTitle').style.color = 'var(--orange)';
+  document.getElementById('viewerTitle').textContent = item.title;
+  document.getElementById('viewerMeta').textContent  = `${item.platform} · ${item.type} · ${item.tone}`;
+  document.getElementById('viewerActions').style.display = 'flex';
+
+  const hasImg = item.platform.includes('Facebook') || item.platform.includes('Instagram');
+  document.getElementById('btnQueue').style.display   = item.platform.includes('Facebook') ? 'inline-block' : 'none';
+  document.getElementById('btnPostNow').style.display = item.platform.includes('Facebook') ? 'inline-block' : 'none';
+  document.getElementById('scheduleBar').style.display= item.platform.includes('Facebook') ? 'block' : 'none';
+  document.getElementById('imagePanel').style.display = hasImg ? 'flex' : 'none';
+
+  selectedScheduleTime = null;
   document.querySelectorAll('.schedule-slot').forEach(s=>s.classList.remove('selected'));
-  document.getElementById('customTime').value='';
+  document.getElementById('customTime').value = '';
+  document.getElementById('scheduleSelected').style.display = 'none';
   removeSelectedImage();
   renderQueue();
 }
 
-// Schedule
+// ════════════════════════════════════════════
+// EDIT FUNCTIONS
+// ════════════════════════════════════════════
+function onContentEdit(){
+  const item = items.find(i=>i.id===activeId);
+  if(!item) return;
+  item.editedText = document.getElementById('contentDisplay').innerText;
+  updateEditState(item);
+  updateCharCount();
+  saveHistory();
+}
+function updateEditState(item){
+  const isEdited = item.editedText && item.editedText!==item.text;
+  document.getElementById('editedBadge').style.display = isEdited ? 'inline-block' : 'none';
+}
+function updateCharCount(){
+  const text  = document.getElementById('contentDisplay').innerText || '';
+  const count = text.length;
+  const el    = document.getElementById('charCount');
+  el.textContent = `${count} ký tự`;
+  // correct ternary order: check higher threshold first
+  el.style.color = count>1000 ? '#ef4444' : count>500 ? '#f59e0b' : 'var(--muted)';
+}
+function undoEdit(){
+  document.execCommand('undo');
+  const item = items.find(i=>i.id===activeId);
+  if(item){ item.editedText = document.getElementById('contentDisplay').innerText; updateEditState(item); }
+  updateCharCount();
+}
+function revertToOriginal(){
+  const item = items.find(i=>i.id===activeId);
+  if(!item) return;
+  showConfirm('Về bản gốc?', 'Tất cả chỉnh sửa sẽ bị xóa và khôi phục về bản AI tạo ra.', ()=>{
+    item.editedText = null;
+    document.getElementById('contentDisplay').textContent = item.text;
+    updateEditState(item);
+    updateCharCount();
+    saveHistory();
+    showToast('✓ Đã khôi phục bản gốc', 'info');
+  });
+}
+function getActiveText(){
+  const item = items.find(i=>i.id===activeId);
+  if(!item) return '';
+  return item.editedText || item.text;
+}
+function copyActive(){
+  const text = getActiveText();
+  if(!text) return;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('btnCopy');
+    btn.textContent = 'COPIED ✓'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='COPY'; btn.classList.remove('copied'); }, 2000);
+    showToast('✓ Đã copy vào clipboard', 'success');
+  }).catch(()=> showToast('Lỗi copy', 'error'));
+}
+function downloadContent(){
+  const item = items.find(i=>i.id===activeId);
+  if(!item) return;
+  const text = getActiveText();
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `ironland_${item.title.replace(/[^a-zA-Z0-9]/g,'_').slice(0,40)}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ Đã tải file .txt', 'success');
+}
+
+// ════════════════════════════════════════════
+// SCHEDULE
+// ════════════════════════════════════════════
 function selectSlot(el){
   document.querySelectorAll('.schedule-slot').forEach(s=>s.classList.remove('selected'));
   el.classList.add('selected');
-  const [h,m]=el.dataset.time.split(':');
-  const d=new Date();d.setHours(parseInt(h),parseInt(m),0,0);
-  if(d<new Date())d.setDate(d.getDate()+1);
-  selectedScheduleTime=d;
-  document.getElementById('customTime').value='';
+  const [h,m] = el.dataset.time.split(':');
+  const d = new Date(); d.setHours(parseInt(h),parseInt(m),0,0);
+  if(d < new Date()) d.setDate(d.getDate()+1);
+  selectedScheduleTime = d;
+  document.getElementById('customTime').value = '';
+  showScheduledTime(d);
 }
 function selectCustomTime(input){
   document.querySelectorAll('.schedule-slot').forEach(s=>s.classList.remove('selected'));
-  selectedScheduleTime=input.value?new Date(input.value):null;
+  selectedScheduleTime = input.value ? new Date(input.value) : null;
+  if(selectedScheduleTime) showScheduledTime(selectedScheduleTime);
+  else document.getElementById('scheduleSelected').style.display = 'none';
+}
+function showScheduledTime(d){
+  const el = document.getElementById('scheduleSelected');
+  el.textContent = `📅 Sẽ đăng lúc: ${d.toLocaleString('vi-VN',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`;
+  el.style.display = 'block';
 }
 
-// Queue actions
+// ════════════════════════════════════════════
+// QUEUE ACTIONS
+// ════════════════════════════════════════════
+function saveQueue(){ try { localStorage.setItem(QUEUE_KEY, JSON.stringify(queue.slice(-50))); } catch(e){} }
+
 function addToQueue(){
-  const item=items.find(i=>i.id===activeId);
-  if(!item)return;
-  if(!settings.webhookUrl){alert('Vui lòng cài đặt Webhook URL trước!');openSettings();return;}
-  if(!selectedScheduleTime){alert('Vui lòng chọn giờ đăng!');return;}
-  const qItem={id:Date.now(),contentId:item.id,text:getActiveText(),title:item.title,imageData:selectedImageData,scheduledAt:selectedScheduleTime,status:'pending'};
+  const item = items.find(i=>i.id===activeId);
+  if(!item) return;
+  if(!settings.webhookUrl){ showToast('⚠ Vui lòng cài đặt Webhook URL trước!', 'warning'); openSettings(); return; }
+  if(!selectedScheduleTime){ showToast('⚠ Vui lòng chọn giờ đăng!', 'warning'); return; }
+  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, imageData:selectedImageData, scheduledAt:selectedScheduleTime, status:'pending'};
   queue.push(qItem);
-  renderQueue();renderHistory();
-  const btn=document.getElementById('btnQueue');
-  btn.textContent='✓ ĐÃ LÊN LỊCH';btn.classList.add('queued');
-  setTimeout(()=>{btn.textContent='📅 LÊN LỊCH ĐĂNG';btn.classList.remove('queued');},2500);
-  const delay=selectedScheduleTime-new Date();
-  if(delay>0)setTimeout(()=>sendToMake(qItem),delay);
+  saveQueue(); renderQueue(); renderHistory();
+  const btn = document.getElementById('btnQueue');
+  btn.textContent='✓ ĐÃ LÊN LỊCH'; btn.classList.add('queued');
+  setTimeout(()=>{ btn.textContent='📅 LÊN LỊCH'; btn.classList.remove('queued'); }, 2500);
+  const delay = selectedScheduleTime - new Date();
+  if(delay>0) setTimeout(()=>sendToMake(qItem), delay);
   else sendToMake(qItem);
+  showToast(`✓ Đã lên lịch đăng lúc ${selectedScheduleTime.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}`, 'success');
 }
 
 function postNow(){
-  const item=items.find(i=>i.id===activeId);
-  if(!item)return;
-  if(!settings.webhookUrl){alert('Vui lòng cài đặt Webhook URL!');openSettings();return;}
-  const qItem={id:Date.now(),contentId:item.id,text:getActiveText(),title:item.title,imageData:selectedImageData,scheduledAt:new Date(),status:'pending'};
-  queue.push(qItem);renderQueue();renderHistory();
+  const item = items.find(i=>i.id===activeId);
+  if(!item) return;
+  if(!settings.webhookUrl){ showToast('⚠ Vui lòng cài đặt Webhook URL!', 'warning'); openSettings(); return; }
+  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, imageData:selectedImageData, scheduledAt:new Date(), status:'pending'};
+  queue.push(qItem); saveQueue(); renderQueue(); renderHistory();
   sendToMake(qItem);
+  showToast('▶ Đang gửi lên Make.com...', 'info');
 }
 
 async function sendToMake(qItem){
-  qItem.status='sending';renderQueue();
-  const payload={
-    message:qItem.text,
-    scheduled_at:qItem.scheduledAt.toISOString(),
-    title:qItem.title,
-    page_id:settings.pageId||'',
-    source:'IronLand Content Factory',
-    has_image:!!qItem.imageData,
-    image_base64:qItem.imageData?qItem.imageData.base64:'',
-    image_name:qItem.imageData?qItem.imageData.name:''
+  qItem.status = 'sending'; renderQueue();
+  const payload = {
+    message: qItem.text,
+    scheduled_at: qItem.scheduledAt.toISOString(),
+    title: qItem.title,
+    page_id: settings.pageId || '',
+    source: 'IronLand Content Factory v2',
+    has_image: !!qItem.imageData,
+    image_base64: qItem.imageData ? qItem.imageData.base64 : '',
+    image_name:   qItem.imageData ? qItem.imageData.name  : ''
   };
-  try{
-    await fetch(settings.webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},mode:'no-cors',body:JSON.stringify(payload)});
-    qItem.status='posted';
-  }catch(err){qItem.status='failed';}
-  renderQueue();renderHistory();
-  if(qItem.status==='posted'){
-    const msg=document.createElement('div');msg.className='success-msg';
-    msg.textContent=`✅ Đã gửi lên Make.com${qItem.imageData?' (kèm ảnh '+qItem.imageData.name+')':' (không có ảnh)'} — ${new Date().toLocaleTimeString('vi-VN')}`;
-    document.getElementById('queueSection').after(msg);
-    setTimeout(()=>msg.remove(),5000);
+  try {
+    await fetch(settings.webhookUrl, {method:'POST', headers:{'Content-Type':'application/json'}, mode:'no-cors', body:JSON.stringify(payload)});
+    qItem.status = 'posted';
+    showToast(`✅ Đã đăng: "${qItem.title}"${qItem.imageData?' (kèm ảnh)':''}`, 'success', 4000);
+  } catch(err){
+    qItem.status = 'failed';
+    showToast(`❌ Gửi thất bại: ${err.message}`, 'error', 5000);
   }
+  saveQueue(); renderQueue(); renderHistory();
 }
 
 function renderQueue(){
-  const allQ=[...queue].reverse();
-  const section=document.getElementById('queueSection');
-  const list=document.getElementById('queueList');
-  if(!allQ.length){section.style.display='none';return;}
-  section.style.display='block';list.innerHTML='';
+  const allQ = [...queue].reverse();
+  const section = document.getElementById('queueSection');
+  const list    = document.getElementById('queueList');
+  if(!allQ.length){ section.style.display='none'; return; }
+  section.style.display='block'; list.innerHTML='';
   allQ.forEach(q=>{
-    const statusLabel={pending:'CHỜ ĐĂNG',sending:'ĐANG GỬI...',posted:'ĐÃ ĐĂNG',failed:'LỖI'}[q.status]||q.status;
-    const el=document.createElement('div');el.className='queue-item';
-    const imgHtml=q.imageData?`<img class="queue-img-thumb" src="${q.imageData.url}" alt="">` : `<div class="queue-img-none"></div>`;
-    el.innerHTML=`<div class="queue-dot ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}"></div>
+    const statusLabel = {pending:'CHỜ ĐĂNG',sending:'ĐANG GỬI...',posted:'ĐÃ ĐĂNG',failed:'LỖI'}[q.status]||q.status;
+    const el = document.createElement('div'); el.className='queue-item';
+    const imgHtml = q.imageData ? `<img class="queue-img-thumb" src="${q.imageData.url}" alt="">` : `<div class="queue-img-none"></div>`;
+    const scheduled = q.scheduledAt instanceof Date ? q.scheduledAt : new Date(q.scheduledAt);
+    el.innerHTML=`
+      <div class="queue-dot ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}"></div>
       ${imgHtml}
-      <div class="queue-text">${q.title}</div>
-      <div class="queue-time">${q.scheduledAt.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="queue-text">${escHtml(q.title)}</div>
+      <div class="queue-time">${scheduled.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
       <div class="queue-badge ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}">${statusLabel}</div>`;
     list.appendChild(el);
   });
 }
 
-// ── EDIT FUNCTIONS ──
-function onContentEdit(){
-  const item=items.find(i=>i.id===activeId);
-  if(!item)return;
-  const currentText=document.getElementById('contentDisplay').innerText;
-  item.editedText=currentText;
-  updateEditState(item);
-  updateCharCount();
-}
-
-function updateEditState(item){
-  const isEdited=item.editedText&&item.editedText!==item.text;
-  document.getElementById('editedBadge').style.display=isEdited?'inline-block':'none';
-}
-
-function updateCharCount(){
-  const text=document.getElementById('contentDisplay').innerText||'';
-  const count=text.length;
-  const el=document.getElementById('charCount');
-  el.textContent=`${count} ký tự`;
-  // FB recommend < 500 chars for best reach
-  el.style.color=count>500?'#f59e0b':count>1000?'#ef4444':'var(--muted)';
-}
-
-function undoEdit(){
-  document.execCommand('undo');
-  const item=items.find(i=>i.id===activeId);
-  if(item){item.editedText=document.getElementById('contentDisplay').innerText;updateEditState(item);}
-  updateCharCount();
-}
-
-function revertToOriginal(){
-  const item=items.find(i=>i.id===activeId);
-  if(!item)return;
-  if(!confirm('Về lại bản gốc do AI tạo? Các chỉnh sửa sẽ bị mất.'))return;
-  item.editedText=null;
-  document.getElementById('contentDisplay').textContent=item.text;
-  updateEditState(item);
-  updateCharCount();
-}
-
-function getActiveText(){
-  // Always use edited version if exists
-  const item=items.find(i=>i.id===activeId);
-  if(!item)return'';
-  return item.editedText||item.text;
-}
-
-
-function copyActive(){
-  const item=items.find(i=>i.id===activeId);
-  if(!item)return;
-  navigator.clipboard.writeText(getActiveText()).then(()=>{
-    const btn=document.getElementById('btnCopy');btn.textContent='COPIED ✓';btn.classList.add('copied');
-    setTimeout(()=>{btn.textContent='COPY';btn.classList.remove('copied');},2000);
-  });
-}
-
+// ════════════════════════════════════════════
 // GENERATE
-const SYSTEM_PROMPT=`Bạn là chuyên gia content marketing cho Iron Land Rope Access & Rescue Training Center.
+// ════════════════════════════════════════════
+const SYSTEM_PROMPT = `Bạn là chuyên gia content marketing cho Iron Land Rope Access & Rescue Training Center.
 THƯƠNG HIỆU: Iron Land | Slogan: "Built Unbreakable" | Tiêu chuẩn: IRATA, SPRAT, ATLĐ Việt Nam
 Dịch vụ: Đào tạo Rope Access Level 1-3, Rescue, Work at Height, tư vấn/bán thiết bị.
 GIỌNG: Chuyên gia thực chiến, câu ngắn mạnh, cảnh báo thẳng, trao giá trị thật.
 CẤU TRÚC: HOOK → VALUE → CTA
 HASHTAG: #IronLand #BuiltUnbreakable #IronLandTraining + phù hợp chủ đề
-FORMAT TIKTOK: Scene [SCENE 1 – 0:00–0:03], 30-60s
-FORMAT FACEBOOK: Văn xuôi, xuống dòng, emoji chọn lọc
-Nếu cả 2 nền tảng: 2 bài riêng, tiêu đề phân cách. Chỉ xuất nội dung, không giải thích.`;
+FORMAT TIKTOK: Kịch bản scene [SCENE 1 – 0:00–0:03], tổng 30-60s, góc quay + lời thoại
+FORMAT FACEBOOK: Văn xuôi, xuống dòng rõ ràng, emoji chọn lọc
+FORMAT INSTAGRAM: Caption ngắn gọn súc tích, hook mạnh, 5-10 hashtags cuối
+Nếu nhiều nền tảng: tạo từng bài riêng, phân cách bằng tiêu đề rõ ràng.
+Chỉ xuất nội dung, không giải thích thêm.`;
 
 async function generate(){
-  const platforms=getSelectedPlatforms();
-  const brief=document.getElementById('brief').value.trim();
-  const contentType=document.getElementById('contentType').value;
-  const tone=document.getElementById('tone').value;
-  const extra=document.getElementById('extra').value.trim();
-  if(!brief){alert('Vui lòng nhập chủ đề!');return;}
-  if(!platforms.length){alert('Vui lòng chọn nền tảng!');return;}
+  if(!settings.apiKey){ showToast('⚠ Chưa có API Key! Vui lòng cài đặt.', 'warning', 4000); openSettings(); return; }
+  const platforms = getSelectedPlatforms();
+  const brief     = document.getElementById('brief').value.trim();
+  const contentType = document.getElementById('contentType').value;
+  const tone      = document.getElementById('tone').value;
+  const extra     = document.getElementById('extra').value.trim();
+  if(!brief){ showToast('⚠ Vui lòng nhập chủ đề!', 'warning'); return; }
+  if(!platforms.length){ showToast('⚠ Vui lòng chọn ít nhất một nền tảng!', 'warning'); return; }
 
-  const userPrompt=`Tạo content loại "${typeMap[contentType]}" cho nền tảng: ${platforms.join(' và ')}.
-Tone: ${toneMap[tone]}. Brief: ${brief}${extra?'\nThêm: '+extra:''}
-Tạo đầy đủ cho từng nền tảng.`;
+  const userPrompt = `Tạo content loại "${typeMap[contentType]}" cho nền tảng: ${platforms.join(' và ')}.
+Tone: ${toneMap[tone]}. Brief: ${brief}${extra?'\nThông tin thêm: '+extra:''}
+Tạo đầy đủ và tối ưu cho từng nền tảng đã chọn.`;
 
-  const id=Date.now();
-  const shortTitle=brief.length>32?brief.slice(0,32)+'…':brief;
-  const newItem={id,title:shortTitle,platform:platforms.join('+'),type:typeMap[contentType],tone:toneMap[tone],text:''};
-  items.unshift(newItem);activeId=id;renderHistory();
+  const id = Date.now();
+  const shortTitle = brief.length > 32 ? brief.slice(0,32)+'…' : brief;
+  const newItem = {id, title:shortTitle, platform:platforms.join('+'), type:typeMap[contentType], tone:toneMap[tone], text:'', editedText:null, createdAt: new Date().toISOString()};
+  items.unshift(newItem); activeId = id;
 
-  document.getElementById('welcomeState').style.display='none';
-  document.getElementById('contentArea').style.display='block';
-  const display=document.getElementById('contentDisplay');
-  display.textContent='';
-  display.contentEditable='false'; // disabled during streaming
-  document.getElementById('editHint').style.display='none';
+  document.getElementById('welcomeState').style.display = 'none';
+  document.getElementById('contentArea').style.display  = 'block';
+  const display = document.getElementById('contentDisplay');
+  display.textContent = '';
+  display.contentEditable = 'false';
+  document.getElementById('editHint').style.display  = 'none';
   document.getElementById('editToolbar').classList.remove('visible');
-  document.getElementById('editedBadge').style.display='none';
-  document.getElementById('viewerTitle').style.color='var(--orange)';
-  document.getElementById('viewerTitle').textContent=shortTitle;
-  document.getElementById('viewerMeta').textContent=`${platforms.join('+')}·${typeMap[contentType]}·${toneMap[tone]}`;
-  document.getElementById('viewerActions').style.display='none';
-  const hasFB=platforms.includes('Facebook');
-  document.getElementById('imagePanel').style.display=hasFB?'flex':'none';
-  document.getElementById('scheduleBar').style.display='none';
-  document.getElementById('queueSection').style.display='none';
+  document.getElementById('editedBadge').style.display = 'none';
+  document.getElementById('viewerTitle').style.color = 'var(--orange)';
+  document.getElementById('viewerTitle').textContent = shortTitle;
+  document.getElementById('viewerMeta').textContent  = `${platforms.join('+')} · ${typeMap[contentType]} · ${toneMap[tone]}`;
+  document.getElementById('viewerActions').style.display = 'none';
+
+  const hasImg = platforms.includes('Facebook') || platforms.includes('Instagram');
+  document.getElementById('imagePanel').style.display  = hasImg ? 'flex' : 'none';
+  document.getElementById('scheduleBar').style.display = 'none';
+  document.getElementById('queueSection').style.display= 'none';
+  document.getElementById('scheduleSelected').style.display='none';
   removeSelectedImage();
+  renderHistory();
 
-  const cursor=document.createElement('span');cursor.className='cursor';display.appendChild(cursor);
-  const btn=document.getElementById('btnGenerate');btn.disabled=true;btn.classList.add('loading');
-  document.getElementById('btnText').textContent='ĐANG TẠO...';
+  const cursor = document.createElement('span'); cursor.className='cursor'; display.appendChild(cursor);
+  const btn = document.getElementById('btnGenerate');
+  btn.disabled=true; btn.classList.add('loading');
+  document.getElementById('btnText').textContent = 'ĐANG TẠO...';
 
-  let fullText='';
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{
+  let fullText = '';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
         'Content-Type':'application/json',
-        'x-api-key':'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',
+        'x-api-key': settings.apiKey,
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,stream:true,system:SYSTEM_PROMPT,messages:[{role:'user',content:userPrompt}]})
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens: 1800,
+        stream: true,
+        system: SYSTEM_PROMPT,
+        messages: [{role:'user', content:userPrompt}]
+      })
     });
-    const reader=res.body.getReader();const decoder=new TextDecoder();let buffer='';
+
+    if(!res.ok){
+      const errBody = await res.json().catch(()=>({}));
+      const errMsg = errBody?.error?.message || `HTTP ${res.status}`;
+      throw new Error(errMsg);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
     while(true){
-      const{done,value}=await reader.read();if(done)break;
-      buffer+=decoder.decode(value,{stream:true});
-      const lines=buffer.split('\n');buffer=lines.pop();
+      const {done,value} = await reader.read(); if(done) break;
+      buffer += decoder.decode(value, {stream:true});
+      const lines = buffer.split('\n'); buffer = lines.pop();
       for(const line of lines){
-        if(!line.startsWith('data:'))continue;const data=line.slice(5).trim();if(data==='[DONE]')continue;
-        try{const j=JSON.parse(data);if(j.type==='content_block_delta'&&j.delta?.text){fullText+=j.delta.text;display.textContent=fullText;display.appendChild(cursor);}}catch{}
+        if(!line.startsWith('data:')) continue;
+        const data = line.slice(5).trim(); if(data==='[DONE]') continue;
+        try {
+          const j = JSON.parse(data);
+          if(j.type==='content_block_delta' && j.delta?.text){
+            fullText += j.delta.text;
+            display.textContent = fullText;
+            display.appendChild(cursor);
+          }
+        } catch{}
       }
     }
-  }catch(err){
-    display.textContent='';
-    const e=document.createElement('div');e.className='error-msg';e.textContent='⚠️ Lỗi API: '+err.message;
-    document.getElementById('contentArea').appendChild(e);
+  } catch(err){
+    cursor.remove();
+    showToast(`❌ Lỗi API: ${err.message}`, 'error', 6000);
+    items = items.filter(i=>i.id!==id);
+    activeId = null;
+    renderHistory();
+    document.getElementById('welcomeState').style.display = '';
+    document.getElementById('contentArea').style.display  = 'none';
+    btn.disabled=false; btn.classList.remove('loading');
+    document.getElementById('btnText').textContent = '⚡ TẠO CONTENT';
+    return;
   }
 
-  cursor.remove();newItem.text=fullText;display.textContent=fullText;
+  cursor.remove();
+  newItem.text = fullText;
+  display.textContent = fullText;
+  saveHistory();
 
-  // Enable editing after generation
-  display.contentEditable='true';
-  document.getElementById('editHint').style.display='block';
+  display.contentEditable = 'true';
+  document.getElementById('editHint').style.display  = 'block';
   document.getElementById('editToolbar').classList.add('visible');
-  document.getElementById('editedBadge').style.display='none';
+  document.getElementById('editedBadge').style.display = 'none';
   updateCharCount();
 
-  document.getElementById('viewerActions').style.display='flex';
-  document.getElementById('btnQueue').style.display=hasFB?'inline-block':'none';
-  document.getElementById('btnPostNow').style.display=hasFB?'inline-block':'none';
-  document.getElementById('scheduleBar').style.display=hasFB?'block':'none';
-  selectedScheduleTime=null;
-  btn.disabled=false;btn.classList.remove('loading');document.getElementById('btnText').textContent='⚡ TẠO CONTENT';
+  document.getElementById('viewerActions').style.display = 'flex';
+  document.getElementById('btnQueue').style.display   = platforms.includes('Facebook') ? 'inline-block' : 'none';
+  document.getElementById('btnPostNow').style.display = platforms.includes('Facebook') ? 'inline-block' : 'none';
+  document.getElementById('scheduleBar').style.display= platforms.includes('Facebook') ? 'block' : 'none';
+  selectedScheduleTime = null;
+
+  btn.disabled=false; btn.classList.remove('loading');
+  document.getElementById('btnText').textContent = '⚡ TẠO CONTENT';
+  renderHistory();
   renderQueue();
+  showToast('✓ Đã tạo xong content!', 'success');
 }
 
-document.getElementById('brief').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey)generate();});
+// ════════════════════════════════════════════
+// REGENERATE
+// ════════════════════════════════════════════
+function regenerate(){
+  const item = items.find(i=>i.id===activeId);
+  if(!item) return;
+  showConfirm('Tạo lại content?', `Nội dung mới sẽ thay thế bài "${item.title}". Tiếp tục?`, async ()=>{
+    if(!settings.apiKey){ showToast('⚠ Chưa có API Key!', 'warning'); openSettings(); return; }
+
+    const platforms = item.platform.split('+');
+    const typeKey   = Object.keys(typeMap).find(k=>typeMap[k]===item.type) || 'knowledge';
+    const toneKey   = Object.keys(toneMap).find(k=>toneMap[k]===item.tone) || 'professional';
+    const userPrompt= `Tạo lại content loại "${item.type}" cho nền tảng: ${platforms.join(' và ')}.
+Tone: ${item.tone}. Brief: ${item.title}
+Tạo phiên bản mới, khác với bản trước.`;
+
+    const display = document.getElementById('contentDisplay');
+    display.textContent = '';
+    display.contentEditable = 'false';
+    document.getElementById('editToolbar').classList.remove('visible');
+    document.getElementById('viewerActions').style.display = 'none';
+
+    const cursor = document.createElement('span'); cursor.className='cursor'; display.appendChild(cursor);
+    showToast('↺ Đang tạo lại...', 'info');
+
+    let fullText = '';
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':settings.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,stream:true,system:SYSTEM_PROMPT,messages:[{role:'user',content:userPrompt}]})
+      });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const reader=res.body.getReader(); const decoder=new TextDecoder(); let buffer='';
+      while(true){
+        const{done,value}=await reader.read(); if(done) break;
+        buffer+=decoder.decode(value,{stream:true});
+        const lines=buffer.split('\n'); buffer=lines.pop();
+        for(const line of lines){
+          if(!line.startsWith('data:')) continue;
+          const data=line.slice(5).trim(); if(data==='[DONE]') continue;
+          try{const j=JSON.parse(data);if(j.type==='content_block_delta'&&j.delta?.text){fullText+=j.delta.text;display.textContent=fullText;display.appendChild(cursor);}}catch{}
+        }
+      }
+    } catch(err){
+      cursor.remove();
+      showToast(`❌ Lỗi: ${err.message}`, 'error');
+      display.textContent = item.text;
+      display.contentEditable = 'true';
+      document.getElementById('editToolbar').classList.add('visible');
+      document.getElementById('viewerActions').style.display = 'flex';
+      return;
+    }
+
+    cursor.remove();
+    item.text = fullText;
+    item.editedText = null;
+    display.textContent = fullText;
+    display.contentEditable = 'true';
+    document.getElementById('editToolbar').classList.add('visible');
+    document.getElementById('editedBadge').style.display = 'none';
+    document.getElementById('viewerActions').style.display = 'flex';
+    updateCharCount();
+    saveHistory();
+    renderHistory();
+    showToast('✓ Đã tạo lại content!', 'success');
+  });
+}
+
+// ════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════
+function escHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ════════════════════════════════════════════
+document.getElementById('brief').addEventListener('keydown', e=>{
+  if(e.key==='Enter' && e.ctrlKey){ e.preventDefault(); generate(); }
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    closeSettings();
+    closeConfirm();
+  }
+});
 </script>
 </body>
 </html>
