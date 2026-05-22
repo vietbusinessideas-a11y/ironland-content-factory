@@ -125,10 +125,17 @@
   .upload-zone input{display:none;}
   .upload-icon{font-size:24px;margin-bottom:6px;}
   .upload-hint{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;line-height:1.5;}
-  .img-preview{position:relative;border-radius:6px;overflow:hidden;background:var(--panel);border:1px solid var(--border);}
-  .img-preview img{width:100%;display:block;max-height:200px;object-fit:cover;}
-  .img-preview-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .img-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
+  /* Multi-image selected area */
+  .sel-img-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .sel-img-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--blue);}
+  .sel-img-clear{background:transparent;border:none;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;padding:2px 5px;border-radius:2px;transition:color .15s;}
+  .sel-img-clear:hover{color:#ef4444;}
+  .sel-img-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+  .sel-img-item{position:relative;border-radius:4px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;background:var(--panel);}
+  .sel-img-item img{width:100%;height:100%;object-fit:cover;display:block;}
+  .sel-img-remove{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.75);border:none;color:white;width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+  .sel-img-remove:hover{background:#ef4444;}
+  .sel-img-more{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:white;letter-spacing:1px;}
   .library-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:260px;overflow-y:auto;}
   .lib-item{position:relative;border-radius:4px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .15s;aspect-ratio:4/3;background:var(--panel);}
   .lib-item:hover{border-color:var(--orange);}
@@ -465,9 +472,9 @@
               <div class="upload-zone" id="uploadZone"
                 onclick="document.getElementById('fileInput').click()"
                 ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-                <input type="file" id="fileInput" accept="image/*" onchange="onFileSelect(event)">
+                <input type="file" id="fileInput" accept="image/*" multiple onchange="onFileSelect(event)">
                 <div class="upload-icon">📁</div>
-                <div class="upload-hint">Kéo thả hoặc click để chọn ảnh<br>JPG, PNG, WebP — tối đa 4MB</div>
+                <div class="upload-hint">Kéo thả hoặc click — chọn nhiều ảnh cùng lúc<br>JPG, PNG, WebP — tối đa 4MB/ảnh</div>
               </div>
             </div>
             <div id="tabLibrary" style="display:none">
@@ -477,10 +484,13 @@
                 <input type="file" id="libAddInput" accept="image/*" multiple class="lib-add-input" onchange="addToLibrary(event)">
               </div>
             </div>
-            <div class="img-preview" id="imgPreview" style="display:none">
-              <img id="imgPreviewSrc" src="" alt="">
-              <div class="img-preview-name" id="imgPreviewName"></div>
-              <button class="img-remove" onclick="removeSelectedImage()">✕</button>
+            <!-- SELECTED IMAGES GRID (multi) -->
+            <div id="selectedImagesArea" style="display:none">
+              <div class="sel-img-header">
+                <span class="sel-img-label" id="selImgCount"></span>
+                <button class="sel-img-clear" onclick="clearAllImages()">✕ Xóa tất cả</button>
+              </div>
+              <div class="sel-img-grid" id="selImgGrid"></div>
             </div>
           </div>
         </div>
@@ -598,7 +608,9 @@ const SETTINGS_KEY= 'il_settings';
 // STATE
 // ════════════════════════════════════════════
 let items = [], queue = [], library = [];
-let activeId = null, selectedScheduleTime = null, selectedImageData = null;
+let activeId = null, selectedScheduleTime = null;
+let selectedImages = []; // array of {base64, name, url, id}
+const MAX_IMAGES = 10;
 let settings = {};
 let historyFilter = '';
 let confirmCallback = null;
@@ -716,31 +728,49 @@ function onDragLeave(){ document.getElementById('uploadZone').classList.remove('
 function onDrop(e){
   e.preventDefault();
   document.getElementById('uploadZone').classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if(f && f.type.startsWith('image/')) processFile(f);
+  [...e.dataTransfer.files].forEach(f=>{ if(f.type.startsWith('image/')) processFile(f); });
 }
-function onFileSelect(e){ const f=e.target.files[0]; if(f) processFile(f); }
+function onFileSelect(e){ [...e.target.files].forEach(f=>processFile(f)); e.target.value=''; }
+
 function processFile(file){
-  if(file.size > 4*1024*1024){ showToast('⚠ Ảnh quá lớn! Tối đa 4MB.', 'warning'); return; }
+  if(file.size > 4*1024*1024){ showToast(`⚠ "${file.name}" quá lớn! Tối đa 4MB.`, 'warning'); return; }
+  if(selectedImages.length >= MAX_IMAGES){ showToast(`⚠ Tối đa ${MAX_IMAGES} ảnh mỗi bài.`, 'warning'); return; }
   const reader = new FileReader();
   reader.onload = ev => {
-    selectedImageData = {base64:ev.target.result, name:file.name, url:ev.target.result};
-    showImagePreview(ev.target.result, file.name);
-    document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
+    selectedImages.push({id: Date.now()+Math.random(), base64: ev.target.result, name: file.name, url: ev.target.result});
+    renderSelectedImages();
   };
   reader.readAsDataURL(file);
 }
-function showImagePreview(url, name){
-  document.getElementById('imgPreviewSrc').src = url;
-  document.getElementById('imgPreviewName').textContent = name;
-  document.getElementById('imgPreview').style.display = 'block';
+
+function renderSelectedImages(){
+  const area  = document.getElementById('selectedImagesArea');
+  const grid  = document.getElementById('selImgGrid');
+  const count = document.getElementById('selImgCount');
+  if(!selectedImages.length){ area.style.display='none'; return; }
+  area.style.display = 'block';
+  count.textContent  = `${selectedImages.length}/${MAX_IMAGES} ảnh đã chọn`;
+  grid.innerHTML     = '';
+  selectedImages.forEach((img, i)=>{
+    const el = document.createElement('div');
+    el.className = 'sel-img-item';
+    el.innerHTML = `<img src="${img.url}" alt="${escHtml(img.name)}" loading="lazy">
+      <button class="sel-img-remove" onclick="removeImageAt(${i})" title="Xóa ảnh này">✕</button>`;
+    grid.appendChild(el);
+  });
+  renderLibrary(); // sync library selection state
 }
-function removeSelectedImage(){
-  selectedImageData = null;
-  document.getElementById('imgPreview').style.display = 'none';
-  document.getElementById('imgPreviewSrc').src = '';
+
+function removeImageAt(index){
+  selectedImages.splice(index, 1);
+  renderSelectedImages();
+}
+
+function clearAllImages(){
+  selectedImages = [];
   document.getElementById('fileInput').value = '';
-  document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
+  renderSelectedImages();
+  renderLibrary();
 }
 
 // ════════════════════════════════════════════
@@ -767,8 +797,9 @@ function renderLibrary(){
   [...grid.querySelectorAll('.lib-item')].forEach(e=>e.remove());
   empty.style.display = library.length ? 'none' : 'block';
   library.forEach(img=>{
+    const isSelected = selectedImages.some(s=>s.url===img.url);
     const el = document.createElement('div');
-    el.className = 'lib-item' + (selectedImageData && selectedImageData.url===img.url ? ' selected' : '');
+    el.className = 'lib-item' + (isSelected ? ' selected' : '');
     el.dataset.id = img.id;
     el.innerHTML = `<img src="${img.url}" alt="${img.name}" loading="lazy">`;
     el.onclick = ()=> selectLibraryImage(img, el);
@@ -776,15 +807,16 @@ function renderLibrary(){
   });
 }
 function selectLibraryImage(img, el){
-  document.querySelectorAll('.lib-item').forEach(i=>i.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedImageData = {base64:img.base64, name:img.name, url:img.url};
-  showImagePreview(img.url, img.name);
-  // switch tab to upload to show preview
-  document.querySelectorAll('.img-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.img-tab')[0].classList.add('active');
-  document.getElementById('tabUpload').style.display  = 'block';
-  document.getElementById('tabLibrary').style.display = 'none';
+  const idx = selectedImages.findIndex(s=>s.url===img.url);
+  if(idx >= 0){
+    selectedImages.splice(idx, 1);
+    el.classList.remove('selected');
+  } else {
+    if(selectedImages.length >= MAX_IMAGES){ showToast(`⚠ Tối đa ${MAX_IMAGES} ảnh.`, 'warning'); return; }
+    selectedImages.push({id:img.id, base64:img.base64, name:img.name, url:img.url});
+    el.classList.add('selected');
+  }
+  renderSelectedImages();
 }
 
 // ════════════════════════════════════════════
@@ -910,7 +942,7 @@ function selectItem(id){
   document.querySelectorAll('.schedule-slot').forEach(s=>s.classList.remove('selected'));
   document.getElementById('customTime').value = '';
   document.getElementById('scheduleSelected').style.display = 'none';
-  removeSelectedImage();
+  clearAllImages();
   renderQueue();
 }
 
@@ -1032,7 +1064,7 @@ function addToQueue(){
   if(!item) return;
   if(!settings.webhookUrl){ showToast('⚠ Vui lòng cài đặt Webhook URL trước!', 'warning'); openSettings(); return; }
   if(!selectedScheduleTime){ showToast('⚠ Vui lòng chọn giờ đăng!', 'warning'); return; }
-  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, imageData:selectedImageData, scheduledAt:selectedScheduleTime, status:'pending'};
+  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, images:[...selectedImages], scheduledAt:selectedScheduleTime, status:'pending'};
   queue.push(qItem);
   saveQueue(); renderQueue(); renderHistory();
   const btn = document.getElementById('btnQueue');
@@ -1048,7 +1080,7 @@ function postNow(){
   const item = items.find(i=>i.id===activeId);
   if(!item) return;
   if(!settings.webhookUrl){ showToast('⚠ Vui lòng cài đặt Webhook URL!', 'warning'); openSettings(); return; }
-  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, imageData:selectedImageData, scheduledAt:new Date(), status:'pending'};
+  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, images:[...selectedImages], scheduledAt:new Date(), status:'pending'};
   queue.push(qItem); saveQueue(); renderQueue(); renderHistory();
   sendToMake(qItem);
   showToast('▶ Đang gửi lên Make.com...', 'info');
@@ -1056,20 +1088,25 @@ function postNow(){
 
 async function sendToMake(qItem){
   qItem.status = 'sending'; renderQueue();
+  const imgs = qItem.images || [];
   const payload = {
-    message: qItem.text,
+    message:      qItem.text,
     scheduled_at: qItem.scheduledAt.toISOString(),
-    title: qItem.title,
-    page_id: settings.pageId || '',
-    source: 'IronLand Content Factory v2',
-    has_image: !!qItem.imageData,
-    image_base64: qItem.imageData ? qItem.imageData.base64 : '',
-    image_name:   qItem.imageData ? qItem.imageData.name  : ''
+    title:        qItem.title,
+    page_id:      settings.pageId || '',
+    source:       'IronLand Content Factory v2',
+    image_count:  imgs.length,
+    has_image:    imgs.length > 0,
+    images:       imgs.map(i=>({name:i.name, base64:i.base64})),
+    // backward compat — first image
+    image_base64: imgs[0] ? imgs[0].base64 : '',
+    image_name:   imgs[0] ? imgs[0].name   : ''
   };
   try {
     await fetch(settings.webhookUrl, {method:'POST', headers:{'Content-Type':'application/json'},  body:JSON.stringify(payload)});
     qItem.status = 'posted';
-    showToast(`✅ Đã đăng: "${qItem.title}"${qItem.imageData?' (kèm ảnh)':''}`, 'success', 4000);
+    const imgNote = imgs.length ? ` (kèm ${imgs.length} ảnh)` : '';
+    showToast(`✅ Đã đăng: "${qItem.title}"${imgNote}`, 'success', 4000);
   } catch(err){
     qItem.status = 'failed';
     showToast(`❌ Gửi thất bại: ${err.message}`, 'error', 5000);
@@ -1086,7 +1123,13 @@ function renderQueue(){
   allQ.forEach(q=>{
     const statusLabel = {pending:'CHỜ ĐĂNG',sending:'ĐANG GỬI...',posted:'ĐÃ ĐĂNG',failed:'LỖI'}[q.status]||q.status;
     const el = document.createElement('div'); el.className='queue-item';
-    const imgHtml = q.imageData ? `<img class="queue-img-thumb" src="${q.imageData.url}" alt="">` : `<div class="queue-img-none"></div>`;
+    const imgs = q.images || (q.imageData ? [q.imageData] : []);
+    const imgHtml = imgs.length
+      ? `<div style="position:relative;width:28px;height:28px;flex-shrink:0;">
+           <img class="queue-img-thumb" src="${imgs[0].url}" alt="" style="width:28px;height:28px;border-radius:3px;object-fit:cover;">
+           ${imgs.length>1?`<span style="position:absolute;bottom:0;right:0;background:var(--orange);color:white;font-size:8px;font-weight:700;padding:1px 3px;border-radius:2px;line-height:1;">+${imgs.length-1}</span>`:''}
+         </div>`
+      : `<div class="queue-img-none"></div>`;
     const scheduled = q.scheduledAt instanceof Date ? q.scheduledAt : new Date(q.scheduledAt);
     el.innerHTML=`
       <div class="queue-dot ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}"></div>
@@ -1170,7 +1213,7 @@ Tạo đầy đủ và tối ưu cho từng nền tảng đã chọn.`;
   document.getElementById('scheduleBar').style.display = 'none';
   document.getElementById('queueSection').style.display= 'none';
   document.getElementById('scheduleSelected').style.display='none';
-  removeSelectedImage();
+  clearAllImages();
   renderHistory();
 
   const cursor = document.createElement('span'); cursor.className='cursor'; display.appendChild(cursor);
