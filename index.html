@@ -1067,7 +1067,7 @@ async function sendToMake(qItem){
     image_name:   qItem.imageData ? qItem.imageData.name  : ''
   };
   try {
-    await fetch(settings.webhookUrl, {method:'POST', headers:{'Content-Type':'application/json'}, mode:'no-cors', body:JSON.stringify(payload)});
+    await fetch(settings.webhookUrl, {method:'POST', headers:{'Content-Type':'application/json'},  body:JSON.stringify(payload)});
     qItem.status = 'posted';
     showToast(`✅ Đã đăng: "${qItem.title}"${qItem.imageData?' (kèm ảnh)':''}`, 'success', 4000);
   } catch(err){
