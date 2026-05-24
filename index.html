@@ -147,6 +147,20 @@
   .lib-add-btn:hover{border-color:var(--orange);color:var(--orange);}
   .lib-add-input{display:none;}
 
+  /* ── URL IMAGE TAB ── */
+  .url-input-wrap{padding:8px 0;display:flex;flex-direction:column;gap:7px;}
+  .url-input-wrap input{font-family:'IBM Plex Mono',monospace;font-size:10px;}
+  .url-hint{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);line-height:1.6;}
+  .url-hint span{color:var(--blue);}
+  .url-converted{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--green);padding:4px 7px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:3px;word-break:break-all;line-height:1.5;display:none;}
+  .url-preview-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);margin-bottom:4px;}
+  .url-preview-img{width:100%;border-radius:4px;border:1px solid var(--border);display:block;}
+  .url-clear-btn{background:transparent;border:none;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;padding:3px 0;transition:color .15s;text-align:left;}
+  .url-clear-btn:hover{color:#ef4444;}
+  .url-status{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:4px 7px;border-radius:3px;display:none;}
+  .url-status.ok{color:var(--green);background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);}
+  .url-status.err{color:#f87171;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);}
+
   /* ── SCHEDULE BAR ── */
   .schedule-bar{background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:12px 14px;margin-top:16px;max-width:960px;}
   .schedule-bar-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:9px;text-transform:uppercase;}
@@ -160,7 +174,11 @@
 
   /* ── QUEUE ── */
   .queue-section{margin-top:16px;max-width:960px;}
-  .queue-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+  .queue-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .queue-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+  .queue-meta{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-left:6px;}
+  .queue-clear-btn{background:transparent;border:none;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:9px;cursor:pointer;padding:2px 7px;border-radius:2px;transition:color .15s;letter-spacing:.5px;}
+  .queue-clear-btn:hover{color:#ef4444;}
   .queue-item{display:flex;align-items:center;gap:9px;padding:7px 11px;background:var(--panel);border:1px solid var(--border);border-radius:4px;margin-bottom:5px;font-size:12px;}
   .queue-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
   .queue-dot.pending{background:var(--blue);}
@@ -174,8 +192,16 @@
   .queue-badge.pending{background:var(--blue-dim);color:var(--blue);}
   .queue-badge.posted{background:rgba(34,197,94,.1);color:var(--green);}
   .queue-badge.failed{background:rgba(239,68,68,.1);color:#f87171;}
+  .queue-del{background:transparent;border:none;color:var(--muted);cursor:pointer;width:22px;height:22px;border-radius:3px;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;padding:0;}
+  .queue-del:hover{color:#ef4444;background:rgba(239,68,68,.15);}
   .queue-item{transition:background .15s,border-color .15s;}
   .queue-item:hover{background:rgba(255,255,255,.04);border-color:var(--orange);}
+  /* Pagination */
+  .queue-pager{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;}
+  .queue-pager-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:3px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;transition:all .15s;}
+  .queue-pager-btn:hover:not(:disabled){border-color:var(--orange);color:var(--orange);}
+  .queue-pager-btn:disabled{opacity:.3;cursor:not-allowed;}
+  .queue-pager-info{color:var(--muted);min-width:70px;text-align:center;}
 
   /* ── WELCOME STATE ── */
   .welcome{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:.3;text-align:center;}
@@ -469,6 +495,7 @@
             <div class="img-tabs">
               <button class="img-tab active" onclick="switchImgTab('upload',this)">Upload</button>
               <button class="img-tab" onclick="switchImgTab('library',this)">Thư viện</button>
+              <button class="img-tab" onclick="switchImgTab('url',this)">🔗 Link</button>
             </div>
             <div id="tabUpload">
               <div class="upload-zone" id="uploadZone"
@@ -484,6 +511,24 @@
                 <div class="lib-empty" id="libEmpty">Thư viện trống.<br>Thêm ảnh Iron Land để tái sử dụng.</div>
                 <button class="lib-add-btn" onclick="document.getElementById('libAddInput').click()">+ Thêm ảnh vào thư viện</button>
                 <input type="file" id="libAddInput" accept="image/*" multiple class="lib-add-input" onchange="addToLibrary(event)">
+              </div>
+            </div>
+            <!-- TAB: LINK URL -->
+            <div id="tabUrl" style="display:none">
+              <div class="url-input-wrap">
+                <input type="text" id="imageUrlInput" placeholder="Dán link ảnh từ Google Photos, Imgur..." oninput="onImageUrlInput(this.value)">
+                <div class="url-hint">
+                  <span>Google Photos (khuyên dùng):</span> mở ảnh → chuột phải → <b>Copy image address</b><br>
+                  Link đúng có dạng: <span>lh3.googleusercontent.com/pw/...</span><br>
+                  <span>Imgur:</span> dán link trực tiếp đuôi .jpg/.png cũng được
+                </div>
+                <div class="url-converted" id="urlConverted"></div>
+                <div class="url-status" id="urlStatus"></div>
+                <div id="urlPreviewArea" style="display:none">
+                  <div class="url-preview-label">Xem trước:</div>
+                  <img id="urlPreviewImg" class="url-preview-img" src="" alt="preview">
+                  <button class="url-clear-btn" onclick="clearImageUrl()">✕ Xóa link</button>
+                </div>
               </div>
             </div>
             <!-- SELECTED IMAGES GRID (multi) -->
@@ -516,8 +561,19 @@
 
         <!-- QUEUE -->
         <div class="queue-section" id="queueSection" style="display:none">
-          <div class="queue-title">Danh sách đăng</div>
+          <div class="queue-header">
+            <div style="display:flex;align-items:center;gap:0">
+              <span class="queue-title">Danh sách đăng</span>
+              <span class="queue-meta" id="queueMeta"></span>
+            </div>
+            <button class="queue-clear-btn" onclick="clearQueueConfirm()">✕ Xóa hết</button>
+          </div>
           <div id="queueList"></div>
+          <div class="queue-pager" id="queuePager" style="display:none">
+            <button class="queue-pager-btn" id="queuePrev" onclick="queueGoPage(queuePage-1)">← Trước</button>
+            <span class="queue-pager-info" id="queuePageInfo"></span>
+            <button class="queue-pager-btn" id="queueNext" onclick="queueGoPage(queuePage+1)">Sau →</button>
+          </div>
         </div>
       </div>
     </div>
@@ -612,7 +668,10 @@ const SETTINGS_KEY= 'il_settings';
 let items = [], queue = [], library = [];
 let activeId = null, selectedScheduleTime = null;
 let selectedImages = []; // array of {base64, name, url, id}
+let imageUrl = null;     // URL-mode image (Google Drive, Imgur, etc.)
 const MAX_IMAGES = 10;
+const QUEUE_PAGE_SIZE = 15;
+let queuePage = 0;
 let settings = {};
 let historyFilter = '';
 let confirmCallback = null;
@@ -748,6 +807,7 @@ function switchImgTab(tab, el){
   el.classList.add('active');
   document.getElementById('tabUpload').style.display  = tab==='upload'  ? 'block' : 'none';
   document.getElementById('tabLibrary').style.display = tab==='library' ? 'block' : 'none';
+  document.getElementById('tabUrl').style.display     = tab==='url'     ? 'block' : 'none';
 }
 function onDragOver(e){ e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
 function onDragLeave(){ document.getElementById('uploadZone').classList.remove('drag-over'); }
@@ -794,9 +854,123 @@ function removeImageAt(index){
 
 function clearAllImages(){
   selectedImages = [];
+  imageUrl = null;
   document.getElementById('fileInput').value = '';
+  clearImageUrl();
   renderSelectedImages();
   renderLibrary();
+}
+
+// ════════════════════════════════════════════
+// URL IMAGE — Google Drive / Imgur / etc.
+// ════════════════════════════════════════════
+function convertImageLink(url){
+  url = url.trim();
+
+  // ── Google Photos — link trang web (KHÔNG dùng được) ──
+  if(url.includes('photos.google.com') || url.includes('photos.app.goo.gl')){
+    return {
+      direct: null,
+      err: '⚠ Đây là link trang web, không phải link ảnh trực tiếp.\n\nCách lấy đúng:\n1. Mở Google Photos trên máy tính\n2. Mở ảnh muốn dùng\n3. Chuột phải vào ảnh → "Copy image address"\n4. Dán link vừa copy vào đây'
+    };
+  }
+
+  // ── Google Photos — link trực tiếp lh3.googleusercontent.com/pw/ ──
+  if(url.includes('lh3.googleusercontent.com/pw/')){
+    // Chuẩn hóa: bỏ size params cũ, set w2048 cho Facebook
+    const base = url.replace(/=[whs]\d+(-[whs]\d+(-[whs]\d+)?)?$/, '');
+    const optimized = base + '=w2048';
+    const wasConverted = optimized !== url;
+    return {direct: optimized, converted: wasConverted, note: wasConverted ? '✓ Đã tối ưu kích thước cho Facebook (w2048)' : null};
+  }
+
+  // ── Google Drive — /file/d/FILE_ID/view ──
+  let m = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return {direct:`https://lh3.googleusercontent.com/d/${m[1]}`, converted:true, note:'✓ Đã chuyển link Drive sang link trực tiếp'};
+
+  // ── Google Drive — /uc?id= hoặc /open?id= ──
+  m = url.match(/drive\.google\.com\/(?:uc|open)[^?]*\?.*[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m) return {direct:`https://lh3.googleusercontent.com/d/${m[1]}`, converted:true, note:'✓ Đã chuyển link Drive sang link trực tiếp'};
+
+  // ── Drive lh3 (file/d format đã convert trước) ──
+  if(url.includes('lh3.googleusercontent.com/d/')) return {direct:url, converted:false};
+
+  // ── Imgur ──
+  if(url.includes('imgur.com')){
+    // imgur.com/XXXXX → i.imgur.com/XXXXX.jpg
+    const imgurMatch = url.match(/imgur\.com\/([a-zA-Z0-9]+)(?:\.[a-z]+)?$/);
+    if(imgurMatch && !url.includes('i.imgur.com')){
+      return {direct:`https://i.imgur.com/${imgurMatch[1]}.jpg`, converted:true, note:'✓ Đã chuyển sang link ảnh trực tiếp Imgur'};
+    }
+    return {direct:url, converted:false};
+  }
+
+  // ── URL khác — dùng nguyên ──
+  return {direct:url, converted:false};
+}
+
+function onImageUrlInput(val){
+  const raw = val.trim();
+  const convertedEl = document.getElementById('urlConverted');
+  const statusEl    = document.getElementById('urlStatus');
+  const previewArea = document.getElementById('urlPreviewArea');
+  const previewImg  = document.getElementById('urlPreviewImg');
+  convertedEl.style.display = 'none';
+  statusEl.style.display    = 'none';
+  previewArea.style.display = 'none';
+  imageUrl = null;
+  if(!raw) return;
+
+  const result = convertImageLink(raw);
+
+  // Có lỗi rõ ràng (link trang web, không phải link ảnh)
+  if(result.err){
+    statusEl.innerHTML = result.err.replace(/\n/g,'<br>');
+    statusEl.className = 'url-status err';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  const {direct, converted, note} = result;
+
+  // Hiển thị note chuyển đổi nếu có
+  if(note){
+    convertedEl.textContent = note;
+    convertedEl.style.display = 'block';
+  }
+  // Cập nhật input với link đã chuẩn hóa
+  if(converted || (direct !== raw)){
+    document.getElementById('imageUrlInput').value = direct;
+  }
+
+  statusEl.textContent = '⏳ Đang tải ảnh để kiểm tra...';
+  statusEl.className = 'url-status ok';
+  statusEl.style.display = 'block';
+
+  // Test tải ảnh
+  const testImg = document.createElement('img');
+  testImg.onload = ()=>{
+    imageUrl = direct;
+    previewImg.src = direct;
+    previewArea.style.display = 'block';
+    statusEl.textContent = '✅ Ảnh hợp lệ — sẵn sàng đăng';
+    statusEl.className = 'url-status ok';
+  };
+  testImg.onerror = ()=>{
+    imageUrl = null;
+    statusEl.innerHTML = '❌ Không tải được ảnh.<br>Kiểm tra: ảnh đã được chia sẻ công khai chưa? Link có đúng không?';
+    statusEl.className = 'url-status err';
+    previewArea.style.display = 'none';
+  };
+  testImg.src = direct;
+}
+
+function clearImageUrl(){
+  imageUrl = null;
+  document.getElementById('imageUrlInput').value = '';
+  document.getElementById('urlConverted').style.display = 'none';
+  document.getElementById('urlStatus').style.display    = 'none';
+  document.getElementById('urlPreviewArea').style.display = 'none';
 }
 
 // ════════════════════════════════════════════
@@ -1090,7 +1264,7 @@ function addToQueue(){
   if(!item) return;
   if(!settings.webhookUrl){ showToast('⚠ Vui lòng cài đặt Webhook URL trước!', 'warning'); openSettings(); return; }
   if(!selectedScheduleTime){ showToast('⚠ Vui lòng chọn giờ đăng!', 'warning'); return; }
-  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, images:[...selectedImages], scheduledAt:selectedScheduleTime, status:'pending'};
+  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, images:[...selectedImages], imageUrl:imageUrl, scheduledAt:selectedScheduleTime, status:'pending'};
   queue.push(qItem);
   saveQueue(); renderQueue(); renderHistory();
   const btn = document.getElementById('btnQueue');
@@ -1114,7 +1288,7 @@ function postNow(){
   const item = items.find(i=>i.id===activeId);
   if(!item) return;
   if(!settings.webhookUrl){ showToast('⚠ Vui lòng cài đặt Webhook URL!', 'warning'); openSettings(); return; }
-  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, images:[...selectedImages], scheduledAt:new Date(), status:'pending'};
+  const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, images:[...selectedImages], imageUrl:imageUrl, scheduledAt:new Date(), status:'pending'};
   queue.push(qItem); saveQueue(); renderQueue(); renderHistory();
   sendToMake(qItem);
   showToast('▶ Đang gửi lên Make.com...', 'info');
@@ -1122,24 +1296,31 @@ function postNow(){
 
 async function sendToMake(qItem){
   qItem.status = 'sending'; renderQueue();
-  const imgs = qItem.images || [];
+  const imgs   = qItem.images || [];
+  const urlImg = qItem.imageUrl || null;
+  // Xác định mode ảnh: 'url' | 'base64' | 'none'
+  const imageMode = urlImg ? 'url' : (imgs.length > 0 ? 'base64' : 'none');
   const payload = {
     message:      qItem.text,
     scheduled_at: qItem.scheduledAt.toISOString(),
     title:        qItem.title,
     page_id:      settings.pageId || '',
     source:       'IronLand Content Factory v2',
+    // ── Image mode ──────────────────────────
+    image_mode:   imageMode,           // 'url' | 'base64' | 'none'
+    has_image:    imageMode !== 'none',
+    // URL mode (Google Drive, Imgur...)
+    image_url:    urlImg || '',
+    // Base64 mode (upload trực tiếp)
     image_count:  imgs.length,
-    has_image:    imgs.length > 0,
     images:       imgs.map(i=>({name:i.name, base64:i.base64})),
-    // backward compat — first image
     image_base64: imgs[0] ? imgs[0].base64 : '',
     image_name:   imgs[0] ? imgs[0].name   : ''
   };
   try {
     await fetch(settings.webhookUrl, {method:'POST', headers:{'Content-Type':'application/json'},  body:JSON.stringify(payload)});
     qItem.status = 'posted';
-    const imgNote = imgs.length ? ` (kèm ${imgs.length} ảnh)` : '';
+    const imgNote = imageMode==='url' ? ' (ảnh link)' : imgs.length ? ` (kèm ${imgs.length} ảnh)` : '';
     showToast(`✅ Đã đăng: "${qItem.title}"${imgNote}`, 'success', 4000);
   } catch(err){
     qItem.status = 'failed';
@@ -1148,34 +1329,107 @@ async function sendToMake(qItem){
   saveQueue(); renderQueue(); renderHistory();
 }
 
+function queueGoPage(p){
+  const total = queue.length;
+  const maxPage = Math.max(0, Math.ceil(total / QUEUE_PAGE_SIZE) - 1);
+  queuePage = Math.max(0, Math.min(p, maxPage));
+  renderQueue();
+}
+
+function deleteQueueItem(e, id){
+  e.stopPropagation();
+  queue = queue.filter(q => q.id !== id);
+  // Điều chỉnh trang nếu đang ở trang cuối mà hết items
+  const maxPage = Math.max(0, Math.ceil(queue.length / QUEUE_PAGE_SIZE) - 1);
+  if(queuePage > maxPage) queuePage = maxPage;
+  saveQueue();
+  renderQueue();
+  renderHistory();
+  showToast('Đã xóa khỏi danh sách', 'info', 2000);
+}
+
+function clearQueueConfirm(){
+  if(!queue.length) return;
+  showConfirm(
+    'Xóa toàn bộ danh sách đăng?',
+    `${queue.length} mục sẽ bị xóa vĩnh viễn. Bạn có chắc không?`,
+    ()=>{
+      queue = [];
+      queuePage = 0;
+      saveQueue();
+      renderQueue();
+      renderHistory();
+      showToast('Đã xóa toàn bộ danh sách đăng', 'warning');
+    }
+  );
+}
+
 function renderQueue(){
-  const allQ = [...queue].reverse();
+  const allQ   = [...queue].reverse(); // mới nhất lên đầu
   const section = document.getElementById('queueSection');
   const list    = document.getElementById('queueList');
-  if(!allQ.length){ section.style.display='none'; return; }
-  section.style.display='block'; list.innerHTML='';
-  allQ.forEach(q=>{
-    const statusLabel = {pending:'CHỜ ĐĂNG',sending:'ĐANG GỬI...',posted:'ĐÃ ĐĂNG',failed:'LỖI'}[q.status]||q.status;
+  const pager   = document.getElementById('queuePager');
+  const metaEl  = document.getElementById('queueMeta');
+
+  if(!allQ.length){
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+
+  // Phân trang
+  const totalPages = Math.ceil(allQ.length / QUEUE_PAGE_SIZE);
+  if(queuePage >= totalPages) queuePage = totalPages - 1;
+  const start = queuePage * QUEUE_PAGE_SIZE;
+  const pageItems = allQ.slice(start, start + QUEUE_PAGE_SIZE);
+
+  // Header meta
+  const postedCount  = queue.filter(q=>q.status==='posted').length;
+  const pendingCount = queue.filter(q=>q.status==='pending').length;
+  metaEl.textContent = ` — ${queue.length} mục · ${postedCount} đã đăng · ${pendingCount} chờ`;
+
+  // Pager
+  if(totalPages > 1){
+    pager.style.display = 'flex';
+    document.getElementById('queuePageInfo').textContent = `Trang ${queuePage+1}/${totalPages}`;
+    document.getElementById('queuePrev').disabled = queuePage === 0;
+    document.getElementById('queueNext').disabled = queuePage === totalPages - 1;
+  } else {
+    pager.style.display = 'none';
+  }
+
+  // Render items
+  list.innerHTML = '';
+  pageItems.forEach(q=>{
+    const statusLabel = {pending:'CHỜ ĐĂNG', sending:'ĐANG GỬI...', posted:'ĐÃ ĐĂNG', failed:'LỖI'}[q.status] || q.status;
+    const statusCls   = q.status==='posted' ? 'posted' : q.status==='failed' ? 'failed' : 'pending';
     const el = document.createElement('div');
-    el.className='queue-item';
+    el.className = 'queue-item';
     el.style.cursor = 'pointer';
     el.title = 'Click để xem/chỉnh sửa nội dung';
+
     const imgs = q.images || (q.imageData ? [q.imageData] : []);
     const imgHtml = imgs.length
       ? `<div style="position:relative;width:28px;height:28px;flex-shrink:0;">
            <img class="queue-img-thumb" src="${imgs[0].url}" alt="" style="width:28px;height:28px;border-radius:3px;object-fit:cover;">
            ${imgs.length>1?`<span style="position:absolute;bottom:0;right:0;background:var(--orange);color:white;font-size:8px;font-weight:700;padding:1px 3px;border-radius:2px;line-height:1;">+${imgs.length-1}</span>`:''}
          </div>`
-      : `<div class="queue-img-none"></div>`;
+      : (q.imageUrl
+          ? `<div style="width:28px;height:28px;border-radius:3px;background:var(--blue-dim);border:1px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;">🔗</div>`
+          : `<div class="queue-img-none"></div>`);
+
     const scheduled = q.scheduledAt instanceof Date ? q.scheduledAt : new Date(q.scheduledAt);
-    el.innerHTML=`
-      <div class="queue-dot ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}"></div>
+    el.innerHTML = `
+      <div class="queue-dot ${statusCls}"></div>
       ${imgHtml}
       <div class="queue-text">${escHtml(q.title)}</div>
       <div class="queue-time">${scheduled.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
-      <div class="queue-badge ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}">${statusLabel}</div>`;
-    // Click to open content in viewer
-    el.addEventListener('click', ()=>{
+      <div class="queue-badge ${statusCls}">${statusLabel}</div>
+      <button class="queue-del" title="Xóa khỏi danh sách">✕</button>`;
+
+    // Click row → mở nội dung (chặn nếu click nút xóa)
+    el.addEventListener('click', (e)=>{
+      if(e.target.classList.contains('queue-del')) return;
       if(q.contentId && items.find(i=>i.id===q.contentId)){
         selectItem(q.contentId);
         showToast('📋 Đã mở nội dung để chỉnh sửa', 'info', 2000);
@@ -1183,6 +1437,10 @@ function renderQueue(){
         showToast('⚠ Không tìm thấy nội dung gốc', 'warning', 2000);
       }
     });
+
+    // Nút xóa
+    el.querySelector('.queue-del').addEventListener('click', (e)=> deleteQueueItem(e, q.id));
+
     list.appendChild(el);
   });
 }
