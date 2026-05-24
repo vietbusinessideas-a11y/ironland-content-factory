@@ -1301,6 +1301,7 @@ async function sendToMake(qItem, keepPending = false){
     message:      qItem.text,
     scheduled_at: qItem.scheduledAt.toISOString(),
     post_type:    keepPending ? 'scheduled' : 'immediate',
+    is_scheduled: keepPending ? 1 : 0,
     title:        qItem.title,
     page_id:      settings.pageId || '',
     source:       'IronLand Content Factory v2',
