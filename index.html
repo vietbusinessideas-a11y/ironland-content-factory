@@ -174,6 +174,8 @@
   .queue-badge.pending{background:var(--blue-dim);color:var(--blue);}
   .queue-badge.posted{background:rgba(34,197,94,.1);color:var(--green);}
   .queue-badge.failed{background:rgba(239,68,68,.1);color:#f87171;}
+  .queue-item{transition:background .15s,border-color .15s;}
+  .queue-item:hover{background:rgba(255,255,255,.04);border-color:var(--orange);}
 
   /* ── WELCOME STATE ── */
   .welcome{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:.3;text-align:center;}
@@ -616,6 +618,24 @@ let historyFilter = '';
 let confirmCallback = null;
 
 // ════════════════════════════════════════════
+// SCHEDULER — tự động đăng theo lịch
+// ════════════════════════════════════════════
+function checkScheduledPosts(){
+  const now = new Date();
+  let hasOverdue = false;
+  queue.forEach(q => {
+    if(q.status === 'pending'){
+      const scheduledAt = q.scheduledAt instanceof Date ? q.scheduledAt : new Date(q.scheduledAt);
+      if(scheduledAt <= now){
+        hasOverdue = true;
+        sendToMake(q);
+      }
+    }
+  });
+  return hasOverdue;
+}
+
+// ════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════
 (function init(){
@@ -630,6 +650,12 @@ let confirmCallback = null;
   updateWebhookStatus();
   renderHistory();
   renderLibrary();
+
+  // Kiểm tra bài quá hạn ngay khi mở app
+  setTimeout(()=>{ checkScheduledPosts(); }, 2000);
+
+  // Polling mỗi 60 giây để tự đăng đúng giờ
+  setInterval(checkScheduledPosts, 60000);
 })();
 
 // ════════════════════════════════════════════
@@ -1071,9 +1097,17 @@ function addToQueue(){
   btn.textContent='✓ ĐÃ LÊN LỊCH'; btn.classList.add('queued');
   setTimeout(()=>{ btn.textContent='📅 LÊN LỊCH'; btn.classList.remove('queued'); }, 2500);
   const delay = selectedScheduleTime - new Date();
-  if(delay>0) setTimeout(()=>sendToMake(qItem), delay);
-  else sendToMake(qItem);
-  showToast(`✓ Đã lên lịch đăng lúc ${selectedScheduleTime.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}`, 'success');
+  if(delay <= 0){
+    // Giờ đã qua — đăng ngay
+    sendToMake(qItem);
+  } else if(delay < 2 * 60 * 60 * 1000){
+    // Dưới 2 tiếng — dùng setTimeout (tab vẫn mở)
+    setTimeout(()=>{ if(qItem.status==='pending') sendToMake(qItem); }, delay);
+    showToast(`✓ Đã lên lịch đăng lúc ${selectedScheduleTime.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}`, 'success');
+  } else {
+    // Trên 2 tiếng — polling 60s sẽ tự bắt khi đến giờ
+    showToast(`✓ Đã lên lịch — app sẽ tự đăng lúc ${selectedScheduleTime.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} (giữ tab mở)`, 'success', 5000);
+  }
 }
 
 function postNow(){
@@ -1122,7 +1156,10 @@ function renderQueue(){
   section.style.display='block'; list.innerHTML='';
   allQ.forEach(q=>{
     const statusLabel = {pending:'CHỜ ĐĂNG',sending:'ĐANG GỬI...',posted:'ĐÃ ĐĂNG',failed:'LỖI'}[q.status]||q.status;
-    const el = document.createElement('div'); el.className='queue-item';
+    const el = document.createElement('div');
+    el.className='queue-item';
+    el.style.cursor = 'pointer';
+    el.title = 'Click để xem/chỉnh sửa nội dung';
     const imgs = q.images || (q.imageData ? [q.imageData] : []);
     const imgHtml = imgs.length
       ? `<div style="position:relative;width:28px;height:28px;flex-shrink:0;">
@@ -1137,6 +1174,15 @@ function renderQueue(){
       <div class="queue-text">${escHtml(q.title)}</div>
       <div class="queue-time">${scheduled.toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
       <div class="queue-badge ${q.status==='posted'?'posted':q.status==='failed'?'failed':'pending'}">${statusLabel}</div>`;
+    // Click to open content in viewer
+    el.addEventListener('click', ()=>{
+      if(q.contentId && items.find(i=>i.id===q.contentId)){
+        selectItem(q.contentId);
+        showToast('📋 Đã mở nội dung để chỉnh sửa', 'info', 2000);
+      } else {
+        showToast('⚠ Không tìm thấy nội dung gốc', 'warning', 2000);
+      }
+    });
     list.appendChild(el);
   });
 }
