@@ -1300,6 +1300,7 @@ async function sendToMake(qItem, keepPending = false){
   const payload = {
     message:      qItem.text,
     scheduled_at: qItem.scheduledAt.toISOString(),
+    post_type:    keepPending ? 'scheduled' : 'immediate',
     title:        qItem.title,
     page_id:      settings.pageId || '',
     source:       'IronLand Content Factory v2',
