@@ -1588,6 +1588,7 @@ Tạo đầy đủ và tối ưu cho từng nền tảng đã chọn.`;
   }
 
   cursor.remove();
+  fullText = fullText.replace(/\*\*/g, '');
   newItem.text = fullText;
   display.textContent = fullText;
   saveHistory();
@@ -1668,6 +1669,7 @@ Tạo phiên bản mới, khác với bản trước.`;
     }
 
     cursor.remove();
+    fullText = fullText.replace(/\*\*/g, '');
     item.text = fullText;
     item.editedText = null;
     display.textContent = fullText;
