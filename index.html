@@ -608,6 +608,11 @@
       <input type="text" id="pageId" placeholder="123456789012345">
       <div class="modal-hint">Trang FB → Giới thiệu → cuộn xuống xem Page ID</div>
     </div>
+    <div class="modal-field">
+      <label>Facebook Access Token</label>
+      <input type="text" id="fbToken" placeholder="EAAxxxxxxx...">
+      <div class="modal-hint">Permanent Page Access Token — dùng cho Đăng ngay trực tiếp</div>
+    </div>
 
     <div class="modal-actions">
       <button class="modal-save" onclick="saveSettings()">LƯU CÀI ĐẶT</button>
@@ -758,13 +763,15 @@ function openSettings(){
   document.getElementById('settingsModal').classList.add('open');
   document.getElementById('apiKeyInput').value  = settings.apiKey  || '';
   document.getElementById('webhookUrl').value   = settings.webhookUrl || '';
-  document.getElementById('pageId').value       = settings.pageId  || '';
+  document.getElementById('pageId').value        = settings.pageId  || '';
+  document.getElementById('fbToken').value       = settings.fbToken || '';
 }
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('open'); }
 function saveSettings(){
   settings.apiKey     = document.getElementById('apiKeyInput').value.trim();
   settings.webhookUrl = document.getElementById('webhookUrl').value.trim();
   settings.pageId     = document.getElementById('pageId').value.trim();
+  settings.fbToken    = document.getElementById('fbToken').value.trim();
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   updateApiStatus();
   updateWebhookStatus();
@@ -1284,11 +1291,58 @@ function addToQueue(){
 function postNow(){
   const item = items.find(i=>i.id===activeId);
   if(!item) return;
-  if(!settings.webhookUrl){ showToast('⚠ Vui lòng cài đặt Webhook URL!', 'warning'); openSettings(); return; }
+  if(!settings.pageId || !settings.fbToken){
+    showToast('⚠ Vui lòng cài đặt Page ID và Facebook Token!', 'warning'); openSettings(); return;
+  }
   const qItem = {id:Date.now(), contentId:item.id, text:getActiveText(), title:item.title, images:[...selectedImages], imageUrl:imageUrl, scheduledAt:new Date(), status:'pending'};
   queue.push(qItem); saveQueue(); renderQueue(); renderHistory();
-  sendToMake(qItem);
-  showToast('▶ Đang gửi lên Make.com...', 'info');
+  postToFacebookDirect(qItem);
+}
+
+async function postToFacebookDirect(qItem){
+  qItem.status = 'sending'; renderQueue();
+  const token  = settings.fbToken;
+  const pageId = settings.pageId;
+  const imgs   = qItem.images || [];
+  const urlImg = qItem.imageUrl || null;
+  try {
+    let endpoint, body;
+    if(urlImg){
+      // Đăng ảnh qua URL
+      endpoint = `https://graph.facebook.com/v19.0/${pageId}/photos`;
+      body = new URLSearchParams({ url: urlImg, message: qItem.text, published: 'true', access_token: token });
+    } else if(imgs.length > 0){
+      // Upload ảnh base64 trước, lấy media_fbid rồi đăng
+      const formData = new FormData();
+      const base64 = imgs[0].base64.split(',')[1] || imgs[0].base64;
+      const blob = await (await fetch('data:image/jpeg;base64,' + base64)).blob();
+      formData.append('source', blob, imgs[0].name || 'image.jpg');
+      formData.append('message', qItem.text);
+      formData.append('published', 'true');
+      formData.append('access_token', token);
+      endpoint = `https://graph.facebook.com/v19.0/${pageId}/photos`;
+      const res = await fetch(endpoint, { method: 'POST', body: formData });
+      const data = await res.json();
+      if(data.error) throw new Error(data.error.message);
+      qItem.status = 'posted';
+      showToast(`✅ Đã đăng: "${qItem.title}" (kèm ảnh)`, 'success', 4000);
+      saveQueue(); renderQueue(); renderHistory();
+      return;
+    } else {
+      // Text only
+      endpoint = `https://graph.facebook.com/v19.0/${pageId}/feed`;
+      body = new URLSearchParams({ message: qItem.text, access_token: token });
+    }
+    const res = await fetch(endpoint, { method: 'POST', body });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    qItem.status = 'posted';
+    showToast(`✅ Đã đăng: "${qItem.title}"`, 'success', 4000);
+  } catch(err){
+    qItem.status = 'failed';
+    showToast(`❌ Đăng thất bại: ${err.message}`, 'error', 5000);
+  }
+  saveQueue(); renderQueue(); renderHistory();
 }
 
 async function sendToMake(qItem, keepPending = false){
