@@ -27,6 +27,8 @@
   .settings-btn{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 9px;border-radius:2px;border:1px solid var(--border);color:var(--muted);cursor:pointer;background:transparent;transition:all .15s;}
   .settings-btn:hover{border-color:var(--orange);color:var(--orange);}
   .settings-btn.webhook-ok{border-color:rgba(34,197,94,.4);color:var(--green);background:rgba(34,197,94,.06);}
+  .fb-link{text-decoration:none;border-color:rgba(59,130,246,.35);color:#6ba3f5;}
+  .fb-link:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
 
   /* ── LAYOUT ── */
   .body{display:flex;flex:1;overflow:hidden;}
@@ -366,6 +368,7 @@
   </div>
   <div class="header-right">
     <div class="api-indicator" id="apiIndicator">✗ CHƯA CÀI API KEY</div>
+    <a href="https://www.facebook.com/profile.php?id=61584757420201" target="_blank" class="settings-btn fb-link">📘 Fanpage</a>
     <button class="settings-btn" id="webhookBtn" onclick="openSettings()">⚙ CÀI ĐẶT</button>
     <div class="header-badge">POWERED BY CLAUDE</div>
   </div>
