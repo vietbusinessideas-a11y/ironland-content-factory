@@ -683,18 +683,21 @@ let confirmCallback = null;
 // SCHEDULER — tự động đăng theo lịch
 // ════════════════════════════════════════════
 function checkScheduledPosts(){
+  // Make.com đã xử lý việc đăng qua Scenario B.
+  // Hàm này chỉ cập nhật status UI local khi đã qua giờ đăng.
   const now = new Date();
-  let hasOverdue = false;
+  let changed = false;
   queue.forEach(q => {
     if(q.status === 'pending'){
       const scheduledAt = q.scheduledAt instanceof Date ? q.scheduledAt : new Date(q.scheduledAt);
       if(scheduledAt <= now){
-        hasOverdue = true;
-        sendToMake(q);
+        q.status = 'posted';
+        changed = true;
       }
     }
   });
-  return hasOverdue;
+  if(changed){ saveQueue(); renderQueue(); renderHistory(); }
+  return changed;
 }
 
 // ════════════════════════════════════════════
@@ -1273,18 +1276,9 @@ function addToQueue(){
   const btn = document.getElementById('btnQueue');
   btn.textContent='✓ ĐÃ LÊN LỊCH'; btn.classList.add('queued');
   setTimeout(()=>{ btn.textContent='📅 LÊN LỊCH'; btn.classList.remove('queued'); }, 2500);
-  const delay = selectedScheduleTime - new Date();
-  if(delay <= 0){
-    // Giờ đã qua — đăng ngay
-    sendToMake(qItem);
-  } else if(delay < 2 * 60 * 60 * 1000){
-    // Dưới 2 tiếng — dùng setTimeout (tab vẫn mở)
-    setTimeout(()=>{ if(qItem.status==='pending') sendToMake(qItem); }, delay);
-    showToast(`✓ Đã lên lịch đăng lúc ${selectedScheduleTime.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}`, 'success');
-  } else {
-    // Trên 2 tiếng — polling 60s sẽ tự bắt khi đến giờ
-    showToast(`✓ Đã lên lịch — app sẽ tự đăng lúc ${selectedScheduleTime.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})} (giữ tab mở)`, 'success', 5000);
-  }
+  // Gửi webhook ngay đến Make.com để lưu vào Data Store — không cần giữ tab mở
+  sendToMake(qItem, true);
+  showToast(`📅 Đã gửi lịch lên Make.com — sẽ tự đăng lúc ${selectedScheduleTime.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}`, 'success', 5000);
 }
 
 function postNow(){
@@ -1297,7 +1291,7 @@ function postNow(){
   showToast('▶ Đang gửi lên Make.com...', 'info');
 }
 
-async function sendToMake(qItem){
+async function sendToMake(qItem, keepPending = false){
   qItem.status = 'sending'; renderQueue();
   const imgs   = qItem.images || [];
   const urlImg = qItem.imageUrl || null;
@@ -1322,9 +1316,15 @@ async function sendToMake(qItem){
   };
   try {
     await fetch(settings.webhookUrl, {method:'POST', headers:{'Content-Type':'application/json'},  body:JSON.stringify(payload)});
-    qItem.status = 'posted';
-    const imgNote = imageMode==='url' ? ' (ảnh link)' : imgs.length ? ` (kèm ${imgs.length} ảnh)` : '';
-    showToast(`✅ Đã đăng: "${qItem.title}"${imgNote}`, 'success', 4000);
+    if(keepPending){
+      // Lên lịch: Make.com đã nhận và lưu vào Data Store, giữ CHỜ ĐĂNG
+      qItem.status = 'pending';
+    } else {
+      // Đăng ngay: đánh dấu đã đăng
+      qItem.status = 'posted';
+      const imgNote = imageMode==='url' ? ' (ảnh link)' : imgs.length ? ` (kèm ${imgs.length} ảnh)` : '';
+      showToast(`✅ Đã đăng: "${qItem.title}"${imgNote}`, 'success', 4000);
+    }
   } catch(err){
     qItem.status = 'failed';
     showToast(`❌ Gửi thất bại: ${err.message}`, 'error', 5000);
